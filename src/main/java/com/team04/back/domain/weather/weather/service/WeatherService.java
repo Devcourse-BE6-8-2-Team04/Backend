@@ -1,13 +1,19 @@
 package com.team04.back.domain.weather.weather.service;
 
 import com.team04.back.domain.weather.weather.entity.WeatherInfo;
+import com.team04.back.domain.weather.weather.enums.Weather;
 import com.team04.back.domain.weather.weather.repository.WeatherRepository;
 import com.team04.back.infra.weather.WeatherApiClient;
+import com.team04.back.infra.weather.dto.DailyData;
+import com.team04.back.infra.weather.dto.OneCallApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -21,28 +27,20 @@ public class WeatherService {
     }
 
     @Transactional
-    public WeatherInfo getWeatherInfoByLocationAndDate(double lat, double lon, LocalDateTime date) {
+    public WeatherInfo getWeatherInfoByLocationAndDate(double lat, double lon, LocalDate date) {
         // 좌표로부터 지역 이름 조회
         String location = getLocationFromCoordinates(lat, lon);
 
         // DB에서 해당 지역의 날씨 정보 조회
         Optional<WeatherInfo> weatherInfoOpt = weatherRepository.findByLocation(location);
 
-        // 조회 결과가 있으면 유효성 검사
-        if (weatherInfoOpt.isPresent()) {
-            WeatherInfo weatherInfo = weatherInfoOpt.get();
-
-            if (isValid(weatherInfo)) {
-                // 유효하면 반환
-                return weatherInfo;
-            } else {
-                // 유효하지 않으면 갱신 후 반환
-                return updateWeatherInfo(weatherInfo, location, date);
-            }
+        // 조회 결과가 있고 유효한 경우
+        if (weatherInfoOpt.isPresent() && isValid(weatherInfoOpt.get())) {
+            return weatherInfoOpt.get();
         }
-
-        // 조회 결과가 없으면 새로 저장 후 반환
-        return createWeatherInfo(location, date);
+        // 조회 결과가 없거나 유효하지 않은 경우
+        WeatherInfo info = weatherInfoOpt.orElseGet(WeatherInfo::new);
+        return updateWeatherInfo(info, location, lat, lon, date);
     }
 
     // 좌표로부터 지역 이름을 가져오는 메서드
@@ -63,20 +61,57 @@ public class WeatherService {
         return lastUpdated.isAfter(LocalDateTime.now().minusHours(3));
     }
 
-    // 날씨 정보 갱신
-    private WeatherInfo updateWeatherInfo(WeatherInfo weatherInfo, String location, LocalDateTime date) {
-        // TODO: 날씨 정보 갱신 로직 구현
+    private WeatherInfo updateWeatherInfo(WeatherInfo info, String location, double lat, double lon, LocalDate date) {
+        LocalDate today = LocalDate.now();
 
-        return weatherRepository.save(weatherInfo);
+        // 요청된 날짜가 오늘 이전인 경우
+        if (date.isBefore(today)) {
+            // 추후 필요 시 과거 날씨 데이터 업데이트 기능 구현
+            // return updateFromPastWeatherApi(info, location, lat, lon, date);
+            throw new IllegalArgumentException("해당 날짜(" + date + ")에 대한 예보 데이터가 존재하지 않습니다.");
+        }
+        // 요청된 날짜가 오늘부터 7일 이내인 경우
+        else if (!date.isAfter(today.plusDays(7))) {
+            return updateFromForecastApi(info, location, lat, lon, date);
+        }
+        // 요청된 날짜가 오늘 이후 7일 이상인 경우
+        else {
+            // 추후 필요 시 장기 예보 데이터 업데이트 기능 구현
+            // return updateFromLongTermForecastApi(info, location, lat, lon, date);
+            throw new IllegalArgumentException("해당 날짜(" + date + ")에 대한 예보 데이터가 존재하지 않습니다.");
+        }
     }
 
-    // 날씨 정보 생성
-    private WeatherInfo createWeatherInfo(String location, LocalDateTime date) {
-        // TODO: 날씨 정보 생성 로직 구현
+    private WeatherInfo updateFromForecastApi(WeatherInfo info, String location, double lat, double lon, LocalDate date) {
+        OneCallApiResponse response = weatherApiClient.fetchOneCallWeatherData(
+                lat,
+                lon,
+                List.of("minutely", "hourly", "current", "alerts"),
+                "metric",
+                "kr"
+        ).block(); // 블록킹 호출로 API 응답을 기다림
 
-        // 새 날씨 정보 객체 생성
-        WeatherInfo newWeatherInfo = new WeatherInfo();
+        DailyData matchedDaily = response.getDaily().stream()
+                .filter(d -> LocalDateTime.ofEpochSecond(d.getDt(), 0, ZoneOffset.UTC)
+                        .toLocalDate().isEqual(date))
+                .findFirst()
+                .orElse(null);
 
-        return weatherRepository.save(newWeatherInfo);
+        if (matchedDaily == null) {
+            throw new IllegalArgumentException("해당 날짜(" + date + ")에 대한 예보 데이터가 존재하지 않습니다.");
+        }
+
+        updateWeatherInfoFromDailyData(info, matchedDaily, location, date);
+        return weatherRepository.save(info);
+    }
+
+    private void updateWeatherInfoFromDailyData(WeatherInfo info, DailyData data, String location, LocalDate date) {
+        info.setWeather(Weather.fromCode(data.getWeather().getFirst().getId()));
+        info.setDailyTemperatureGap(data.getTemp().getMax() - data.getTemp().getMin());
+        info.setFeelsLikeTemperature(data.getFeelsLike().getDay());
+        info.setMaxTemperature(data.getTemp().getMax());
+        info.setMinTemperature(data.getTemp().getMin());
+        info.setLocation(location);
+        info.setDate(date);
     }
 }
