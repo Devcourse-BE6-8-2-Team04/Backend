@@ -28,7 +28,3 @@ server:
       charset: UTF-8   # 문자 인코딩 UTF-8로 설정 (한글 깨짐 방지)
       enabled: true    # 인코딩 설정 켜기
       force: true      # 모든 요청/응답에 UTF-8 강제로 적용
-
-openweather:
-  api:
-    key: API-KEY-HERE
