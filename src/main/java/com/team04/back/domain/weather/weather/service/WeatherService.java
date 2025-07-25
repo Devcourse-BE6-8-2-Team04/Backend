@@ -56,8 +56,11 @@ public class WeatherService {
 
     // 유효성 검사
     private boolean isValid(WeatherInfo weatherInfo) {
-        // TODO: 유효성 검사 로직 구현
-        return true;
+        if (weatherInfo == null) return false;
+        LocalDateTime lastUpdated = weatherInfo.getModifyDate();
+        if (lastUpdated == null) return false;
+        // 마지막 업데이트가 3시간 이내인지 확인
+        return lastUpdated.isAfter(LocalDateTime.now().minusHours(3));
     }
 
     // 날씨 정보 갱신

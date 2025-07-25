@@ -3,6 +3,7 @@ package com.team04.back.domain.weather.weather.entity;
 import com.team04.back.domain.weather.weather.enums.Weather;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -12,6 +13,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
+@Setter
 @Getter
 @NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
