@@ -26,13 +26,30 @@ public class WeatherService {
         weatherRepository.save(weather);
     }
 
+    /**
+     * 좌표와 날짜를 이용하여 날씨 정보 단건을 조회합니다.
+     * @param lat 위도
+     * @param lon 경도
+     * @param date 조회할 날짜
+     * @return 해당 좌표와 날짜에 대한 날씨 정보
+     */
     @Transactional
-    public WeatherInfo getWeatherInfoByLocationAndDate(double lat, double lon, LocalDate date) {
-        // 좌표로부터 지역 이름 조회
+    public WeatherInfo getWeatherInfo(double lat, double lon, LocalDate date) {
         String location = getLocationFromCoordinates(lat, lon);
+        return getWeatherInfo(location, lat, lon, date);
+    }
 
-        // DB에서 해당 지역의 날씨 정보 조회
-        Optional<WeatherInfo> weatherInfoOpt = weatherRepository.findByLocation(location);
+    /**
+     * 지역 이름과 날짜를 이용하여 날씨 정보 단건을 조회합니다.
+     * @param location 지역 이름
+     * @param lat 위도
+     * @param lon 경도
+     * @param date 조회할 날짜
+     * @return 해당 지역과 날짜에 대한 날씨 정보
+     */
+    @Transactional
+    public WeatherInfo getWeatherInfo(String location, double lat, double lon, LocalDate date) {
+        Optional<WeatherInfo> weatherInfoOpt = weatherRepository.findByLocationAndDate(location, date);
 
         // 조회 결과가 있고 유효한 경우
         if (weatherInfoOpt.isPresent() && isValid(weatherInfoOpt.get())) {
@@ -43,7 +60,38 @@ public class WeatherService {
         return updateWeatherInfo(info, location, lat, lon, date);
     }
 
-    // 좌표로부터 지역 이름을 가져오는 메서드
+    /**
+     * 좌표와 날짜 범위를 이용하여 날씨 정보 리스트를 조회합니다.
+     * @param lat 위도
+     * @param lon 경도
+     * @param startDate 시작 날짜
+     * @param endDate 종료 날짜
+     * @return 해당 좌표와 날짜 범위에 대한 날씨 정보 리스트
+     */
+    @Transactional
+    public List<WeatherInfo> getWeatherInfos(double lat, double lon, LocalDate startDate, LocalDate endDate) {
+        // 시작 날짜와 종료 날짜 유효성 검사
+        if (startDate.isAfter(endDate)) {
+            throw new IllegalArgumentException("시작 날짜(" + startDate + ")는 종료 날짜(" + endDate + ")보다 이후일 수 없습니다.");
+        }
+
+        // 날짜 범위 순회하며 데이터 수집
+        List<WeatherInfo> result = new java.util.ArrayList<>();
+        LocalDate date = startDate;
+        while (!date.isAfter(endDate)) {
+            WeatherInfo info = getWeatherInfo(lat, lon, date);
+            result.add(info);
+            date = date.plusDays(1);
+        }
+        return result;
+    }
+
+    /**
+     * 좌표를 이용하여 해당 위치의 이름을 조회합니다.
+     * @param lat 위도
+     * @param lon 경도
+     * @return 해당 좌표에 대한 지역 이름
+     */
     private String getLocationFromCoordinates(double lat, double lon) {
         return weatherApiClient.fetchCityByCoordinates(lat, lon, 1)
                 .blockOptional()
@@ -52,15 +100,27 @@ public class WeatherService {
                 .orElse("알 수 없음");
     }
 
-    // 유효성 검사
+    /**
+     * 날씨 정보가 유효한지 검사합니다.
+     * - 마지막 업데이트가 3시간 이내인지 확인
+     * @param weatherInfo 날씨 정보
+     * @return 유효한 경우 true, 그렇지 않은 경우 false
+     */
     private boolean isValid(WeatherInfo weatherInfo) {
-        if (weatherInfo == null) return false;
         LocalDateTime lastUpdated = weatherInfo.getModifyDate();
         if (lastUpdated == null) return false;
-        // 마지막 업데이트가 3시간 이내인지 확인
         return lastUpdated.isAfter(LocalDateTime.now().minusHours(3));
     }
 
+    /**
+     * 요청된 지역과 날짜의 날씨 정보를 업데이트합니다.
+     * @param info 기존 날씨 정보
+     * @param location 지역 이름
+     * @param lat 위도
+     * @param lon 경도
+     * @param date 요청된 날짜
+     * @return 업데이트된 날씨 정보
+     */
     private WeatherInfo updateWeatherInfo(WeatherInfo info, String location, double lat, double lon, LocalDate date) {
         LocalDate today = LocalDate.now();
 
@@ -82,6 +142,15 @@ public class WeatherService {
         }
     }
 
+    /**
+     * 예보 API를 이용하여 날씨 정보를 업데이트합니다.
+     * @param info 기존 날씨 정보
+     * @param location 지역 이름
+     * @param lat 위도
+     * @param lon 경도
+     * @param date 요청된 날짜
+     * @return 업데이트된 날씨 정보
+     */
     private WeatherInfo updateFromForecastApi(WeatherInfo info, String location, double lat, double lon, LocalDate date) {
         OneCallApiResponse response = weatherApiClient.fetchOneCallWeatherData(
                 lat,
@@ -105,6 +174,13 @@ public class WeatherService {
         return weatherRepository.save(info);
     }
 
+    /**
+     * 일별 날씨 데이터를 이용하여 기존 날씨 정보를 업데이트합니다.
+     * @param info 기존 날씨 정보
+     * @param data 일별 날씨 데이터
+     * @param location 지역 이름
+     * @param date 요청된 날짜
+     */
     private void updateWeatherInfoFromDailyData(WeatherInfo info, DailyData data, String location, LocalDate date) {
         info.setWeather(Weather.fromCode(data.getWeather().getFirst().getId()));
         info.setDailyTemperatureGap(data.getTemp().getMax() - data.getTemp().getMin());
