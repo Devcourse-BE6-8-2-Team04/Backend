@@ -25,5 +25,27 @@ public class ClothInfo {
     @Column(nullable = false)
     private Double minFeelsLike;
 
+    public int getId() {
+        return id;
+    }
 
+    public String getClothName() {
+        return clothName;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public Double getMaxFeelsLike() {
+        return maxFeelsLike;
+    }
+
+    public Double getMinFeelsLike() {
+        return minFeelsLike;
+    }
 }
