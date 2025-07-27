@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static com.team04.back.common.fixture.FixtureFactory.createWeatherInfoList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -38,27 +39,6 @@ class WeatherServiceTest {
     @BeforeEach
     void setUp() {
         weatherInfoList = createWeatherInfoList(TEST_LOCATION, 30);
-    }
-
-    private List<WeatherInfo> createWeatherInfoList(String location, int futureDays) {
-        LocalDate today = LocalDate.now();
-
-        return IntStream.range(0, futureDays)
-                .mapToObj(i -> {
-                    LocalDate currentDate = today.plusDays(i);
-                    LocalDateTime dateTime = currentDate.atTime(12, 0, 0);
-
-                    WeatherInfo weatherInfo = new WeatherInfo();
-                    weatherInfo.setWeather(Weather.values()[i % Weather.values().length]);
-                    weatherInfo.setDailyTemperatureGap(10.0 + i * 0.1);
-                    weatherInfo.setFeelsLikeTemperature(20.0 + i * 0.2);
-                    weatherInfo.setMaxTemperature(25.0 + i * 0.3);
-                    weatherInfo.setMinTemperature(15.0 + i * 0.1);
-                    weatherInfo.setLocation(location);
-                    weatherInfo.setDate(dateTime);
-                    return weatherInfo;
-                })
-                .collect(Collectors.toList());
     }
 
     @Test
