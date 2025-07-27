@@ -1,7 +1,6 @@
 package com.team04.back.domain.weather.weather.service;
 
 import com.team04.back.domain.weather.weather.entity.WeatherInfo;
-import com.team04.back.domain.weather.weather.enums.Weather;
 import com.team04.back.domain.weather.weather.repository.WeatherRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -13,10 +12,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static com.team04.back.common.fixture.FixtureFactory.createWeatherInfoList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -64,3 +61,4 @@ class WeatherServiceTest {
         assertThat(result).containsExactlyInAnyOrderElementsOf(expectedWeatherInfos);
     }
 }
+
