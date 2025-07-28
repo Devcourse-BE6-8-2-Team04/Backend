@@ -19,7 +19,7 @@ public class Comment{
     @Column(nullable = false)
     private String password;
 
-    @Column()
+    @Column(length = 2048)
     private String imageUrl;
 
     @Column(nullable = false)
