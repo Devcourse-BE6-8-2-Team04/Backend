@@ -2,10 +2,6 @@ package com.team04.back.domain.comment.comment.controller;
 
 import com.team04.back.domain.comment.comment.entity.Comment;
 import com.team04.back.domain.comment.comment.service.CommentService;
-import com.team04.back.domain.weather.weather.entity.WeatherInfo;
-import com.team04.back.domain.weather.weather.enums.Weather;
-import com.team04.back.domain.weather.weather.service.WeatherService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,18 +30,6 @@ public class CommentControllerTest {
     private MockMvc mvc;
     @Autowired
     private CommentService commentService;
-    @Autowired
-    private WeatherService weatherService;
-
-    @BeforeEach
-    void setUp() {
-        if(commentService.count() > 0) return;
-
-        WeatherInfo mockWeather = new WeatherInfo(Weather.CLEAR_SKY, 10.0, 20.0, 25.0, 15.0, "서울", LocalDate.of(2022, 1, 1));
-        weatherService.save(mockWeather);
-        Comment comment = new Comment("email", "password", "imageUrl", "sentence", "tagString", mockWeather);
-        commentService.save(comment);
-    }
 
     @Test
     @DisplayName("커멘트 다건 조회")
@@ -84,12 +68,12 @@ public class CommentControllerTest {
         ResultActions resultActions = mvc
                 .perform(
                         get("/api/v1/comments")
-                                .param("location", "서울")
-                                .param("date", "2022-01-01")
+                                .param("location", "일본 삿포로")
+                                .param("date", "2025-01-01")
                 ).andDo(print());
 
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByLocationAndDate("서울", LocalDate.of(2022, 1, 1), pageable);
+        Page<Comment> comments = commentService.findByLocationAndDate("일본 삿포로", LocalDate.of(2025, 1, 1), pageable);
 
         resultActions
                 .andExpect(handler().handlerType(CommentController.class))
@@ -115,12 +99,12 @@ public class CommentControllerTest {
         ResultActions resultActions = mvc
                 .perform(
                         get("/api/v1/comments")
-                                .param("location", "서울")
-                                .param("feelsLikeTemperature", "20.0")
+                                .param("location", "일본 삿포로")
+                                .param("feelsLikeTemperature", "-4.0")
                 ).andDo(print());
 
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByLocationAndTemperature("서울", 20.0, pageable);
+        Page<Comment> comments = commentService.findByLocationAndTemperature("일본 삿포로", -4.0, pageable);
 
         resultActions
                 .andExpect(handler().handlerType(CommentController.class))
@@ -146,7 +130,7 @@ public class CommentControllerTest {
         ResultActions resultActions = mvc
                 .perform(
                         get("/api/v1/comments")
-                                .param("feelsLikeTemperature", "20.0")
+                                .param("feelsLikeTemperature", "-4.0")
                 ).andDo(print());
 
         resultActions
