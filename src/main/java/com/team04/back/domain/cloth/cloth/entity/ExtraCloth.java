@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.Objects;
+
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -60,5 +62,20 @@ public class ExtraCloth implements Clothing {
         if (weather != null) {
             this.weather = weather;
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ExtraCloth that = (ExtraCloth) o;
+        return clothName.equals(that.clothName) &&
+                imageUrl.equals(that.imageUrl) &&
+                weather == that.weather;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(clothName, imageUrl, weather);
     }
 }
