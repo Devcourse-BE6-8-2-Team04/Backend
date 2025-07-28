@@ -71,6 +71,20 @@ public class WeatherService {
      */
     @Transactional
     public List<WeatherInfo> getWeatherInfos(double lat, double lon, LocalDate startDate, LocalDate endDate) {
+        String location = getLocationFromCoordinates(lat, lon);
+        return getWeatherInfos(location, lat, lon, startDate, endDate);
+    }
+
+    /**
+     * 지역 이름과 날짜 범위를 이용하여 날씨 정보 리스트를 조회합니다.
+     * @param lat 위도
+     * @param lon 경도
+     * @param startDate 시작 날짜
+     * @param endDate 종료 날짜
+     * @return 해당 좌표와 날짜 범위에 대한 날씨 정보 리스트
+     */
+    @Transactional
+    public List<WeatherInfo> getWeatherInfos(String location, double lat, double lon, LocalDate startDate, LocalDate endDate) {
         // 시작 날짜와 종료 날짜 유효성 검사
         if (startDate.isAfter(endDate)) {
             throw new IllegalArgumentException("시작 날짜(" + startDate + ")는 종료 날짜(" + endDate + ")보다 이후일 수 없습니다.");
@@ -80,7 +94,7 @@ public class WeatherService {
         List<WeatherInfo> result = new ArrayList<>();
         LocalDate date = startDate;
         while (!date.isAfter(endDate)) {
-            WeatherInfo info = getWeatherInfo(lat, lon, date);
+            WeatherInfo info = getWeatherInfo(location, lat, lon, date);
             result.add(info);
             date = date.plusDays(1);
         }

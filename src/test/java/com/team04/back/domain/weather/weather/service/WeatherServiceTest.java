@@ -156,6 +156,8 @@ class WeatherServiceTest {
         // Given
         LocalDate startDate = today.plusDays(1);
         LocalDate endDate = today;
+        given(weatherApiClient.fetchCityByCoordinates(lat, lon, 1)).willReturn(Mono.just(List.of(createGeoReverseResponse())));
+
 
         // When & Then
         assertThrows(IllegalArgumentException.class, () -> {
