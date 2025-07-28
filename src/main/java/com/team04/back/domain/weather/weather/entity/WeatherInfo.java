@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 @Setter
 @Getter
 @Entity
-@Getter
 @NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 public class WeatherInfo{
