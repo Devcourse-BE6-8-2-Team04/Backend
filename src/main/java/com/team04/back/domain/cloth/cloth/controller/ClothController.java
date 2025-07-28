@@ -7,8 +7,8 @@ import com.team04.back.domain.cloth.cloth.service.ClothService;
 import com.team04.back.domain.weather.weather.entity.WeatherInfo;
 import com.team04.back.domain.weather.weather.service.WeatherService;
 import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.PastOrPresent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,13 +29,16 @@ public class ClothController {
     record TripSchedule(
             @NotBlank
             String place,
-            @NotBlank
-            @PastOrPresent
+            @FutureOrPresent
             LocalDate start,
-            @NotBlank
             @Future
             LocalDate end
     ) {
+        public TripSchedule {
+            if (start != null && end != null && !start.isBefore(end)) {
+                throw new IllegalArgumentException("시작 날짜는 종료 날짜보다 이전이어야 합니다.");
+            }
+        }
     }
 
     @GetMapping
