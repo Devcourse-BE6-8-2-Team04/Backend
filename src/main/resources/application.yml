@@ -15,6 +15,9 @@ spring:
   config:
     import: optional:file:application-secret.yml # 비밀 설정 파일을 선택적으로 가져오기 (존재할 경우만)
 
+springdoc:
+  default-produces-media-type: application/json;charset=UTF-8 # 기본 응답 타입 설정
+
 logging:
   level:
     org.hibernate.orm.jdbc.bind: TRACE     # 바인딩된 SQL 파라미터 출력

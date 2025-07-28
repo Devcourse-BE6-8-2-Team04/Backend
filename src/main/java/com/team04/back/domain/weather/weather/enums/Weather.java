@@ -1,10 +1,13 @@
 package com.team04.back.domain.weather.weather.enums;
 
+import lombok.Getter;
+
 import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@Getter
 public enum Weather {
     // Group 2xx: Thunderstorm
     THUNDERSTORM_LIGHT_RAIN(200, "약한 비를 동반한 뇌우"),
@@ -81,14 +84,6 @@ public enum Weather {
     Weather(int code, String description) {
         this.code = code;
         this.description = description;
-    }
-
-    public int getCode() {
-        return code;
-    }
-
-    public String getDescription() {
-        return description;
     }
 
     private static final Map<Integer, Weather> CODE_MAP =
