@@ -1,4 +1,4 @@
-package com.team04.back.domain.cloth.extracloth.entity;
+package com.team04.back.domain.cloth.cloth.entity;
 
 import com.team04.back.domain.weather.weather.enums.Weather;
 import jakarta.persistence.*;
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ExtraCloth {
+public class ExtraCloth implements Clothing {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;

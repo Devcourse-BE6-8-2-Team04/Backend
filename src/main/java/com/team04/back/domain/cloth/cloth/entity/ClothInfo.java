@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ClothInfo{
+public class ClothInfo implements Clothing {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
