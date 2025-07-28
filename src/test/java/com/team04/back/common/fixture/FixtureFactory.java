@@ -2,7 +2,7 @@ package com.team04.back.common.fixture;
 
 import com.team04.back.domain.cloth.cloth.entity.ClothInfo;
 import com.team04.back.domain.cloth.cloth.enums.Category;
-import com.team04.back.domain.cloth.extracloth.entity.ExtraCloth;
+import com.team04.back.domain.cloth.cloth.entity.ExtraCloth;
 import com.team04.back.domain.weather.weather.entity.WeatherInfo;
 import com.team04.back.domain.weather.weather.enums.Weather;
 
