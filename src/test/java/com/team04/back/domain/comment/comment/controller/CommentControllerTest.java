@@ -158,7 +158,8 @@ public class CommentControllerTest {
     @Test
     @DisplayName("커멘트 단건 조회")
     public void t5() throws Exception {
-        int id = 5; // 테스트용으로 존재하는 ID
+        Page<Comment> comments = commentService.findAll(PageRequest.of(0, 10));
+        int id = comments.getContent().get(0).getId();
 
         ResultActions resultActions = mvc
                 .perform(
