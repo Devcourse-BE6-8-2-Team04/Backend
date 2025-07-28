@@ -11,7 +11,6 @@ import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -42,7 +41,7 @@ public class ClothController {
     }
 
     @GetMapping
-    public OutfitResponse getOutfitWithPeriod(@RequestBody TripSchedule tripSchedule) {
+    public OutfitResponse getOutfitWithPeriod(TripSchedule tripSchedule) {
         List<WeatherInfo> duration = weatherService.getDurationWeather(tripSchedule.place, tripSchedule.start, tripSchedule.end);
         Map<Category, List<Clothing>> outfits = clothService.getOutfitWithPeriod(duration);
         return new OutfitResponse(outfits);
