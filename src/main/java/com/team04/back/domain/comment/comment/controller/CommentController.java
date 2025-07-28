@@ -35,7 +35,6 @@ public class CommentController {
      * @return 커멘트 목록
      */
     @GetMapping
-    @Transactional(readOnly = true)
     @Operation(summary = "커멘트 다건 조회", description = "location, date, feelsLikeTemperature 파라미터를 사용하여 커멘트 목록을 조회합니다.")
     public Page<CommentDto> getComments(
             @RequestParam(required = false) String location,
@@ -47,7 +46,7 @@ public class CommentController {
             throw new ServiceException("400-1", "location 파라미터 없이는 date 또는 feelsLikeTemperature 파라미터를 사용할 수 없습니다.");
         }
 
-        Page<Comment> items;
+        Page<CommentDto> items;
 
         if (location != null && date != null) {
             items = commentService.findByLocationAndDate(location, date, pageable);
@@ -57,7 +56,7 @@ public class CommentController {
             items = commentService.findAll(pageable);
         }
 
-        return items.map(CommentDto::new);
+        return items;
     }
 
     /**
