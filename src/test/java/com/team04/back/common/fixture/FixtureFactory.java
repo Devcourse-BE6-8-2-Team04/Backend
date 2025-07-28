@@ -1,13 +1,12 @@
 package com.team04.back.common.fixture;
 
 import com.team04.back.domain.cloth.cloth.entity.ClothInfo;
-import com.team04.back.domain.cloth.cloth.enums.Category;
 import com.team04.back.domain.cloth.cloth.entity.ExtraCloth;
+import com.team04.back.domain.cloth.cloth.enums.Category;
 import com.team04.back.domain.weather.weather.entity.WeatherInfo;
 import com.team04.back.domain.weather.weather.enums.Weather;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -19,8 +18,8 @@ public class FixtureFactory {
             "테스트 의류",
             "test_image.jpg",
             category,
-            maxTemp,
-            minTemp
+            minTemp,
+            maxTemp
         );
     }
 

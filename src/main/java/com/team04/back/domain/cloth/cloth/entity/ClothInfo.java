@@ -40,7 +40,7 @@ public class ClothInfo implements Clothing {
         this.minFeelsLike = minFeelsLike;
     }
 
-    public static ClothInfo create(String clothName, String imageUrl, Category category, Double maxFeelsLike, Double minFeelsLike) {
+    public static ClothInfo create(String clothName, String imageUrl, Category category, Double minFeelsLike, Double maxFeelsLike) {
         if (clothName == null || clothName.isBlank()) {
             throw new IllegalArgumentException("Cloth name cannot be empty.");
         }
@@ -60,8 +60,8 @@ public class ClothInfo implements Clothing {
                 .clothName(clothName)
                 .imageUrl(imageUrl)
                 .category(category)
-                .maxFeelsLike(maxFeelsLike)
                 .minFeelsLike(minFeelsLike)
+                .maxFeelsLike(maxFeelsLike)
                 .build();
     }
 

@@ -13,8 +13,8 @@ class ClothInfoTest {
     private static final String VALID_CLOTH_NAME = "Test Cloth";
     private static final String VALID_IMAGE_URL = "http://example.com/image.jpg";
     private static final Category VALID_CATEGORY = Category.CASUAL_DAILY;
-    private static final Double VALID_MAX_FEELS_LIKE = 25.0;
     private static final Double VALID_MIN_FEELS_LIKE = 15.0;
+    private static final Double VALID_MAX_FEELS_LIKE = 25.0;
 
     @Test
     @DisplayName("ClothInfo 생성 테스트")
@@ -23,16 +23,16 @@ class ClothInfoTest {
                 VALID_CLOTH_NAME,
                 VALID_IMAGE_URL,
                 VALID_CATEGORY,
-                VALID_MAX_FEELS_LIKE,
-                VALID_MIN_FEELS_LIKE
+                VALID_MIN_FEELS_LIKE,
+                VALID_MAX_FEELS_LIKE
         );
 
         assertThat(clothInfo).isNotNull();
         assertThat(clothInfo.getClothName()).isEqualTo(VALID_CLOTH_NAME);
         assertThat(clothInfo.getImageUrl()).isEqualTo(VALID_IMAGE_URL);
         assertThat(clothInfo.getCategory()).isEqualTo(VALID_CATEGORY);
-        assertThat(clothInfo.getMaxFeelsLike()).isEqualTo(VALID_MAX_FEELS_LIKE);
         assertThat(clothInfo.getMinFeelsLike()).isEqualTo(VALID_MIN_FEELS_LIKE);
+        assertThat(clothInfo.getMaxFeelsLike()).isEqualTo(VALID_MAX_FEELS_LIKE);
     }
 
     @Nested
@@ -42,7 +42,7 @@ class ClothInfoTest {
         @DisplayName("clothName이 null일 경우 IllegalArgumentException 발생")
         void whenClothNameIsNull() {
             assertThrows(IllegalArgumentException.class, () ->
-                    ClothInfo.create(null, VALID_IMAGE_URL, VALID_CATEGORY, VALID_MAX_FEELS_LIKE, VALID_MIN_FEELS_LIKE)
+                    ClothInfo.create(null, VALID_IMAGE_URL, VALID_CATEGORY, VALID_MIN_FEELS_LIKE, VALID_MAX_FEELS_LIKE)
             );
         }
 
@@ -50,7 +50,7 @@ class ClothInfoTest {
         @DisplayName("clothName이 빈 문자열일 경우 IllegalArgumentException 발생")
         void whenClothNameIsBlank() {
             assertThrows(IllegalArgumentException.class, () ->
-                    ClothInfo.create("", VALID_IMAGE_URL, VALID_CATEGORY, VALID_MAX_FEELS_LIKE, VALID_MIN_FEELS_LIKE)
+                    ClothInfo.create("", VALID_IMAGE_URL, VALID_CATEGORY, VALID_MIN_FEELS_LIKE, VALID_MAX_FEELS_LIKE)
             );
         }
 
@@ -58,7 +58,7 @@ class ClothInfoTest {
         @DisplayName("imageUrl이 null일 경우 IllegalArgumentException 발생")
         void whenImageUrlIsNull() {
             assertThrows(IllegalArgumentException.class, () ->
-                    ClothInfo.create(VALID_CLOTH_NAME, null, VALID_CATEGORY, VALID_MAX_FEELS_LIKE, VALID_MIN_FEELS_LIKE)
+                    ClothInfo.create(VALID_CLOTH_NAME, null, VALID_CATEGORY, VALID_MIN_FEELS_LIKE, VALID_MAX_FEELS_LIKE)
             );
         }
 
@@ -66,7 +66,7 @@ class ClothInfoTest {
         @DisplayName("imageUrl이 빈 문자열일 경우 IllegalArgumentException 발생")
         void whenImageUrlIsBlank() {
             assertThrows(IllegalArgumentException.class, () ->
-                    ClothInfo.create(VALID_CLOTH_NAME, "", VALID_CATEGORY, VALID_MAX_FEELS_LIKE, VALID_MIN_FEELS_LIKE)
+                    ClothInfo.create(VALID_CLOTH_NAME, "", VALID_CATEGORY, VALID_MIN_FEELS_LIKE, VALID_MAX_FEELS_LIKE)
             );
         }
 
@@ -74,7 +74,7 @@ class ClothInfoTest {
         @DisplayName("category가 null일 경우 IllegalArgumentException 발생")
         void whenCategoryIsNull() {
             assertThrows(IllegalArgumentException.class, () ->
-                    ClothInfo.create(VALID_CLOTH_NAME, VALID_IMAGE_URL, null, VALID_MAX_FEELS_LIKE, VALID_MIN_FEELS_LIKE)
+                    ClothInfo.create(VALID_CLOTH_NAME, VALID_IMAGE_URL, null, VALID_MIN_FEELS_LIKE, VALID_MAX_FEELS_LIKE)
             );
         }
 
@@ -82,7 +82,7 @@ class ClothInfoTest {
         @DisplayName("maxFeelsLike이 null일 경우 IllegalArgumentException 발생")
         void whenMaxFeelsLikeIsNull() {
             assertThrows(IllegalArgumentException.class, () ->
-                    ClothInfo.create(VALID_CLOTH_NAME, VALID_IMAGE_URL, VALID_CATEGORY, null, VALID_MIN_FEELS_LIKE)
+                    ClothInfo.create(VALID_CLOTH_NAME, VALID_IMAGE_URL, VALID_CATEGORY, VALID_MAX_FEELS_LIKE, null)
             );
         }
 
@@ -90,7 +90,7 @@ class ClothInfoTest {
         @DisplayName("minFeelsLike이 null일 경우 IllegalArgumentException 발생")
         void whenMinFeelsLikeIsNull() {
             assertThrows(IllegalArgumentException.class, () ->
-                    ClothInfo.create(VALID_CLOTH_NAME, VALID_IMAGE_URL, VALID_CATEGORY, VALID_MAX_FEELS_LIKE, null)
+                    ClothInfo.create(VALID_CLOTH_NAME, VALID_IMAGE_URL, VALID_CATEGORY, null, VALID_MIN_FEELS_LIKE)
             );
         }
     }
@@ -102,8 +102,8 @@ class ClothInfoTest {
                 VALID_CLOTH_NAME,
                 VALID_IMAGE_URL,
                 VALID_CATEGORY,
-                VALID_MAX_FEELS_LIKE,
-                VALID_MIN_FEELS_LIKE
+                VALID_MIN_FEELS_LIKE,
+                VALID_MAX_FEELS_LIKE
         );
 
         String newClothName = "Updated Cloth";
@@ -117,8 +117,8 @@ class ClothInfoTest {
         assertThat(clothInfo.getClothName()).isEqualTo(newClothName);
         assertThat(clothInfo.getImageUrl()).isEqualTo(newImageUrl);
         assertThat(clothInfo.getCategory()).isEqualTo(newCategory);
-        assertThat(clothInfo.getMaxFeelsLike()).isEqualTo(newMaxFeelsLike);
         assertThat(clothInfo.getMinFeelsLike()).isEqualTo(newMinFeelsLike);
+        assertThat(clothInfo.getMaxFeelsLike()).isEqualTo(newMaxFeelsLike);
     }
 
     @Test
@@ -128,8 +128,8 @@ class ClothInfoTest {
                 VALID_CLOTH_NAME,
                 VALID_IMAGE_URL,
                 VALID_CATEGORY,
-                VALID_MAX_FEELS_LIKE,
-                VALID_MIN_FEELS_LIKE
+                VALID_MIN_FEELS_LIKE,
+                VALID_MAX_FEELS_LIKE
         );
 
         String newClothName = "Only Name Updated";
@@ -137,10 +137,10 @@ class ClothInfoTest {
         clothInfo.update(newClothName, null, null, null, null);
 
         assertThat(clothInfo.getClothName()).isEqualTo(newClothName);
-        assertThat(clothInfo.getImageUrl()).isEqualTo(VALID_IMAGE_URL);  
-        assertThat(clothInfo.getCategory()).isEqualTo(VALID_CATEGORY);  
-        assertThat(clothInfo.getMaxFeelsLike()).isEqualTo(VALID_MAX_FEELS_LIKE);  
-        assertThat(clothInfo.getMinFeelsLike()).isEqualTo(VALID_MIN_FEELS_LIKE);  
+        assertThat(clothInfo.getImageUrl()).isEqualTo(VALID_IMAGE_URL);
+        assertThat(clothInfo.getCategory()).isEqualTo(VALID_CATEGORY);
+        assertThat(clothInfo.getMinFeelsLike()).isEqualTo(VALID_MIN_FEELS_LIKE);
+        assertThat(clothInfo.getMaxFeelsLike()).isEqualTo(VALID_MAX_FEELS_LIKE);
     }
 
     @Test
@@ -150,16 +150,16 @@ class ClothInfoTest {
                 VALID_CLOTH_NAME,
                 VALID_IMAGE_URL,
                 VALID_CATEGORY,
-                VALID_MAX_FEELS_LIKE,
-                VALID_MIN_FEELS_LIKE
+                VALID_MIN_FEELS_LIKE,
+                VALID_MAX_FEELS_LIKE
         );
 
         clothInfo.update("", "", null, null, null);
 
         assertThat(clothInfo.getClothName()).isEqualTo(VALID_CLOTH_NAME);
-        assertThat(clothInfo.getImageUrl()).isEqualTo(VALID_IMAGE_URL);  
-        assertThat(clothInfo.getCategory()).isEqualTo(VALID_CATEGORY);  
-        assertThat(clothInfo.getMaxFeelsLike()).isEqualTo(VALID_MAX_FEELS_LIKE);  
-        assertThat(clothInfo.getMinFeelsLike()).isEqualTo(VALID_MIN_FEELS_LIKE);  
+        assertThat(clothInfo.getImageUrl()).isEqualTo(VALID_IMAGE_URL);
+        assertThat(clothInfo.getCategory()).isEqualTo(VALID_CATEGORY);
+        assertThat(clothInfo.getMinFeelsLike()).isEqualTo(VALID_MIN_FEELS_LIKE);
+        assertThat(clothInfo.getMaxFeelsLike()).isEqualTo(VALID_MAX_FEELS_LIKE);
     }
 }
