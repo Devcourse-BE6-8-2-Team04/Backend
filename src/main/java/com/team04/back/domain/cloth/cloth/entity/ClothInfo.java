@@ -2,7 +2,9 @@ package com.team04.back.domain.cloth.cloth.entity;
 
 import com.team04.back.domain.cloth.cloth.enums.Category;
 import jakarta.persistence.*;
+import lombok.Getter;
 
+@Getter
 @Entity
 public class ClothInfo {
     @Id
@@ -25,27 +27,14 @@ public class ClothInfo {
     @Column(nullable = false)
     private Double minFeelsLike;
 
-    public int getId() {
-        return id;
+    public ClothInfo() {
     }
 
-    public String getClothName() {
-        return clothName;
-    }
-
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public Category getCategory() {
-        return category;
-    }
-
-    public Double getMaxFeelsLike() {
-        return maxFeelsLike;
-    }
-
-    public Double getMinFeelsLike() {
-        return minFeelsLike;
+    public ClothInfo(String clothName, String imageUrl, Category category, Double maxFeelsLike, Double minFeelsLike) {
+        this.clothName = clothName;
+        this.imageUrl = imageUrl;
+        this.category = category;
+        this.maxFeelsLike = maxFeelsLike;
+        this.minFeelsLike = minFeelsLike;
     }
 }
