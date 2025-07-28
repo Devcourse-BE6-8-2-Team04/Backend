@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -35,5 +36,9 @@ public class CommentService {
 
     public long count() {
         return commentRepository.count();
+    }
+
+    public Optional<Comment> findById(int id) {
+        return commentRepository.findById(id);
     }
 }
