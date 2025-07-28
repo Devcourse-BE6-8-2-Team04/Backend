@@ -22,6 +22,7 @@ public class ClothService {
 
     public Map<Category, List<Clothing>> getOutfitWithPeriod(List<WeatherInfo> weatherPlan) {
         Map<Category, List<Clothing>> recommendedClothesMap = new HashMap<>();
+        Set<ExtraCloth> allExtraClothes = new HashSet<>();
 
         for (WeatherInfo weather : weatherPlan) {
             Double feelsLike = weather.getFeelsLikeTemperature();
@@ -34,13 +35,13 @@ public class ClothService {
                         .add(cloth);
             }
 
-            getExtraClothes(weather)
-                    .forEach(extraCloth -> {
-                        recommendedClothesMap
-                                .computeIfAbsent(Category.EXTRA, k -> new ArrayList<>())
-                                .add(extraCloth);
-                    });
+            allExtraClothes.addAll(getExtraClothes(weather));
         }
+
+        recommendedClothesMap
+                .computeIfAbsent(Category.EXTRA, k -> new ArrayList<>())
+                .addAll(allExtraClothes);
+
         return recommendedClothesMap;
     }
 
