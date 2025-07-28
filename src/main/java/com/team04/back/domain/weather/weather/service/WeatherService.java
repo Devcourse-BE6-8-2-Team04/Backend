@@ -17,12 +17,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import java.time.LocalDate;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class WeatherService {
     private final WeatherRepository weatherRepository;
     private final WeatherApiClient weatherApiClient;
 
+    public List<WeatherInfo> getDurationWeather(String location, LocalDate start, LocalDate end) {
+        return weatherRepository.findByLocationAndDateBetween(location, start, end);
+    }
     public void save(WeatherInfo weather) {
         weatherRepository.save(weather);
     }

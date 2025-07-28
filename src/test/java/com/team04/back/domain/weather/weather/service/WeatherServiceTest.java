@@ -5,6 +5,7 @@ import com.team04.back.domain.weather.weather.enums.Weather;
 import com.team04.back.domain.weather.weather.repository.WeatherRepository;
 import com.team04.back.infra.weather.WeatherApiClient;
 import com.team04.back.infra.weather.dto.*;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,8 +13,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
@@ -22,14 +23,18 @@ import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import static com.team04.back.common.fixture.FixtureFactory.createWeatherInfoList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-
+import static org.mockito.Mockito.when;
 /**
  * WeatherService 단위 테스트
  * WeatherService의 getWeatherInfo 및 getWeatherInfos 메서드에 대한 테스트 케이스를 포함합니다.
@@ -229,5 +234,36 @@ class WeatherServiceTest {
         }
         response.setDaily(dailyDataList);
         return response;
+    }
+
+    private List<WeatherInfo> weatherInfoList;
+    private final String TEST_LOCATION = "Seoul";
+
+    @BeforeEach
+    void setUp() {
+        weatherInfoList = createWeatherInfoList(TEST_LOCATION, 30);
+    }
+
+    @Test
+    @DisplayName("지역과, 시작, 종료일이 주어지면 시작, 종료일을 포함한 날씨 정보를 반환한다.")
+    void getWeatherByDuration_success() {
+        LocalDate start = LocalDate.now();
+        LocalDate end = LocalDate.now().plusDays(7);
+
+        List<WeatherInfo> expectedWeatherInfos = weatherInfoList.stream()
+                .filter(wi -> !wi.getDate().isBefore(start) && !wi.getDate().isAfter(end))
+                .collect(Collectors.toList());
+
+        when(weatherRepository.findByLocationAndDateBetween(
+                eq(TEST_LOCATION),
+                eq(start),
+                eq(end))
+        ).thenReturn(expectedWeatherInfos);
+
+        List<WeatherInfo> result = weatherService.getDurationWeather(TEST_LOCATION, start, end);
+
+        assertThat(result).isNotNull();
+        assertThat(result).hasSize(expectedWeatherInfos.size());
+        assertThat(result).containsExactlyInAnyOrderElementsOf(expectedWeatherInfos);
     }
 }
