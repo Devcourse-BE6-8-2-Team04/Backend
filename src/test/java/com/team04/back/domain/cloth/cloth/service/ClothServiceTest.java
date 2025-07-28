@@ -1,8 +1,11 @@
 package com.team04.back.domain.cloth.cloth.service;
 
 import com.team04.back.domain.cloth.cloth.entity.ClothInfo;
+import com.team04.back.domain.cloth.cloth.entity.Clothing;
+import com.team04.back.domain.cloth.cloth.entity.ExtraCloth;
 import com.team04.back.domain.cloth.cloth.enums.Category;
 import com.team04.back.domain.cloth.cloth.repository.ClothRepository;
+import com.team04.back.domain.cloth.cloth.repository.ExtraClothRepository;
 import com.team04.back.domain.weather.weather.entity.WeatherInfo;
 import com.team04.back.domain.weather.weather.enums.Weather;
 import org.junit.jupiter.api.DisplayName;
@@ -18,8 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static com.team04.back.common.fixture.FixtureFactory.createClothInfo;
-import static com.team04.back.common.fixture.FixtureFactory.createWeatherInfo;
+import static com.team04.back.common.fixture.FixtureFactory.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -31,6 +33,8 @@ class ClothServiceTest {
     private ClothService clothService;
     @Mock
     private ClothRepository clothRepository;
+    @Mock
+    private ExtraClothRepository extraClothRepository;
 
     @Test
     @DisplayName("기간(날씨 정보 리스트)이 주어지면, 각 날씨에 적절한 의류를 추천하여 카테고리별로 반환한다.")
@@ -57,7 +61,17 @@ class ClothServiceTest {
         when(clothRepository.findByTemperature(coldWeather.getFeelsLikeTemperature()))
             .thenReturn(List.of(winterCoat, scarf));
 
-        Map<Category, List<ClothInfo>> result = clothService.getOutfitWithPeriod(weatherPlan);
+        ExtraCloth mask = createExtraCloth("마스크", "mask.jpg", Weather.FOG);
+        ExtraCloth umbrella = createExtraCloth("우산", "umbrella.jpg", Weather.HEAVY_RAIN);
+
+        when(extraClothRepository.findByWeather(hotWeather.getWeather()))
+            .thenReturn(List.of(mask));
+        when(extraClothRepository.findByWeather(mildWeather.getWeather()))
+            .thenReturn(List.of());
+        when(extraClothRepository.findByWeather(coldWeather.getWeather()))
+            .thenReturn(List.of(umbrella));
+
+        Map<Category, List<Clothing>> result = clothService.getOutfitWithPeriod(weatherPlan);
 
         assertThat(result).isNotNull();
 
@@ -72,5 +86,9 @@ class ClothServiceTest {
         assertThat(result).containsKey(Category.OUTDOOR);
         assertThat(result.get(Category.OUTDOOR)).containsExactlyInAnyOrder(runningShoes, scarf);
         assertThat(result.get(Category.OUTDOOR)).hasSize(2);
+
+        assertThat(result).containsKey(Category.EXTRA);
+        assertThat(result.get(Category.EXTRA)).containsExactlyInAnyOrder(mask, umbrella);
+        assertThat(result.get(Category.EXTRA)).hasSize(2);
     }
 }
