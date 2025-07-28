@@ -53,7 +53,9 @@ public class ClothInfo implements Clothing {
         if (maxFeelsLike == null || minFeelsLike == null) {
             throw new IllegalArgumentException("Feels like temperatures cannot be null.");
         }
-
+        if (maxFeelsLike < minFeelsLike) {
+            throw new IllegalArgumentException("Max feels like temperature must be greater than or equal to min feels like temperature.");
+        }
         return ClothInfo.builder()
                 .clothName(clothName)
                 .imageUrl(imageUrl)
