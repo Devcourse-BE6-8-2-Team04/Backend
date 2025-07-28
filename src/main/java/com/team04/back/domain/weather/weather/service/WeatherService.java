@@ -16,4 +16,7 @@ public class WeatherService {
     public List<WeatherInfo> getDurationWeather(String location, LocalDate start, LocalDate end) {
         return weatherRepository.findByLocationAndDateBetween(location, start, end);
     }
+    public void save(WeatherInfo weather) {
+        weatherRepository.save(weather);
+    }
 }
