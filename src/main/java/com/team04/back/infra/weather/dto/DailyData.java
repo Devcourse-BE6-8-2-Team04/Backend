@@ -38,5 +38,6 @@ public class DailyData {
     private int clouds;
     private double pop;
     private double rain;
+    private double snow;
     private double uvi;
 }
