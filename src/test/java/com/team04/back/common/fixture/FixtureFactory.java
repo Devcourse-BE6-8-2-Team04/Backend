@@ -2,6 +2,7 @@ package com.team04.back.common.fixture;
 
 import com.team04.back.domain.cloth.cloth.entity.ClothInfo;
 import com.team04.back.domain.cloth.cloth.enums.Category;
+import com.team04.back.domain.cloth.extracloth.entity.ExtraCloth;
 import com.team04.back.domain.weather.weather.entity.WeatherInfo;
 import com.team04.back.domain.weather.weather.enums.Weather;
 
@@ -21,6 +22,11 @@ public class FixtureFactory {
             maxTemp,
             minTemp
         );
+    }
+
+    public static ExtraCloth createExtraCloth(String clothName, String imageUrl, Weather weather) {
+        return ExtraCloth.create(clothName, imageUrl, weather);
+
     }
 
     public static WeatherInfo createWeatherInfo(String location, LocalDateTime date, Weather weather,Double feelsLikeTemperature) {
