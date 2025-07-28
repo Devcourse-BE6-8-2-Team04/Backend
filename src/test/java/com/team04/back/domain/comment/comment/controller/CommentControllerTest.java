@@ -132,4 +132,19 @@ public class CommentControllerTest {
                     .andExpect(jsonPath("$[%d].weatherInfo.feelsLikeTemperature".formatted(i)).value(comment.getWeatherInfo().getFeelsLikeTemperature()));
         }
     }
+
+    @Test
+    @DisplayName("잘못된 파라미터로 인한 예외 처리")
+    public void t4() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/v1/comments")
+                                .param("feelsLikeTemperature", "20.0")
+                ).andDo(print());
+
+        resultActions
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.resultCode").value("400-1"))
+                .andExpect(jsonPath("$.msg").value("location 파라미터 없이는 date 또는 feelsLikeTemperature 파라미터를 사용할 수 없습니다."));
+    }
 }
