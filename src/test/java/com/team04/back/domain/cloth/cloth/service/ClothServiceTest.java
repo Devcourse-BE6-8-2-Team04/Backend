@@ -16,7 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -40,9 +40,9 @@ class ClothServiceTest {
     @Test
     @DisplayName("기간(날씨 정보 리스트)이 주어지면, 각 날씨에 적절한 의류를 추천하여 카테고리별로 반환한다.")
     void getOutfitWithPeriod() {
-        WeatherInfo hotWeather = createWeatherInfo("Seoul", LocalDateTime.now().plusDays(1), Weather.CLEAR_SKY, 26.0);
-        WeatherInfo mildWeather = createWeatherInfo("Seoul", LocalDateTime.now().plusDays(2), Weather.OVERCAST_CLOUDS, 16.0);
-        WeatherInfo coldWeather = createWeatherInfo("Seoul", LocalDateTime.now().plusDays(3), Weather.HEAVY_RAIN, 4.0);
+        WeatherInfo hotWeather = createWeatherInfo("Seoul", LocalDate.now().plusDays(1), Weather.CLEAR_SKY, 26.0);
+        WeatherInfo mildWeather = createWeatherInfo("Seoul", LocalDate.now().plusDays(2), Weather.OVERCAST_CLOUDS, 16.0);
+        WeatherInfo coldWeather = createWeatherInfo("Seoul", LocalDate.now().plusDays(3), Weather.HEAVY_RAIN, 4.0);
         List<WeatherInfo> weatherPlan = Arrays.asList(hotWeather, mildWeather, coldWeather);
 
         ClothInfo summerTee = createClothInfo(Category.CASUAL_DAILY, 25.0, 30.0);

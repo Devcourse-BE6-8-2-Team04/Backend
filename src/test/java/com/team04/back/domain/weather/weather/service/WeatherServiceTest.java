@@ -45,7 +45,7 @@ class WeatherServiceTest {
         LocalDate end = LocalDate.now().plusDays(7);
 
         List<WeatherInfo> expectedWeatherInfos = weatherInfoList.stream()
-                .filter(wi -> !wi.getDate().toLocalDate().isBefore(start) && !wi.getDate().toLocalDate().isAfter(end))
+                .filter(wi -> !wi.getDate().isBefore(start) && !wi.getDate().isAfter(end))
                 .collect(Collectors.toList());
 
         when(weatherRepository.findByLocationAndDateBetween(

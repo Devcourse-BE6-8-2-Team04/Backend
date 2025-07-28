@@ -29,7 +29,7 @@ public class FixtureFactory {
 
     }
 
-    public static WeatherInfo createWeatherInfo(String location, LocalDateTime date, Weather weather,Double feelsLikeTemperature) {
+    public static WeatherInfo createWeatherInfo(String location, LocalDate date, Weather weather,Double feelsLikeTemperature) {
         WeatherInfo weatherInfo = new WeatherInfo();
         weatherInfo.setLocation(location);
         weatherInfo.setDate(date);
@@ -38,7 +38,7 @@ public class FixtureFactory {
         return weatherInfo;
     }
 
-    public static WeatherInfo createDefaultWeatherInfo(String location, LocalDateTime date) {
+    public static WeatherInfo createDefaultWeatherInfo(String location, LocalDate date) {
         return createWeatherInfo(location, date, Weather.CLEAR_SKY, 20.0);
     }
 
@@ -47,11 +47,11 @@ public class FixtureFactory {
 
         return IntStream.range(0, futureDays)
                 .mapToObj(i -> {
-                    LocalDateTime dateTime = today.plusDays(i).atTime(12, 0, 0);
+                    LocalDate date = today.plusDays(i);
                     Weather weather = Weather.values()[i % Weather.values().length];
                     double minTemp = 15.0 + i * 0.1;
                     double maxTemp = 25.0 + i * 0.3;
-                    return createWeatherInfo(location, dateTime, weather, (minTemp + maxTemp) / 2);
+                    return createWeatherInfo(location, date, weather, (minTemp + maxTemp) / 2);
                 })
                 .collect(Collectors.toList());
     }
