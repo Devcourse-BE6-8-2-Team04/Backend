@@ -8,8 +8,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public record OutfitResponse(
-        Map<Category, List<Clothing>> Clothes,
-        Map<Category, List<Clothing>> ExtraClothes
+        Map<Category, List<Clothing>> clothes,
+        Map<Category, List<Clothing>> extraClothes
 ) {
     public OutfitResponse(Map<Category, List<Clothing>> outfits) {
         this(
