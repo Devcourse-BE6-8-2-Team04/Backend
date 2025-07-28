@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -75,8 +76,8 @@ public class WeatherService {
             throw new IllegalArgumentException("시작 날짜(" + startDate + ")는 종료 날짜(" + endDate + ")보다 이후일 수 없습니다.");
         }
 
-        // 날짜 범위 순회하며 데이터 수집
-        List<WeatherInfo> result = new java.util.ArrayList<>();
+        // 범위 내의 모든 날짜에 대해 날씨 정보 조회
+        List<WeatherInfo> result = new ArrayList<>();
         LocalDate date = startDate;
         while (!date.isAfter(endDate)) {
             WeatherInfo info = getWeatherInfo(lat, lon, date);
@@ -86,12 +87,7 @@ public class WeatherService {
         return result;
     }
 
-    /**
-     * 좌표를 이용하여 해당 위치의 이름을 조회합니다.
-     * @param lat 위도
-     * @param lon 경도
-     * @return 해당 좌표에 대한 지역 이름
-     */
+    // 좌표를 이용하여 지역 이름 조회
     private String getLocationFromCoordinates(double lat, double lon) {
         return weatherApiClient.fetchCityByCoordinates(lat, lon, 1)
                 .blockOptional()
@@ -100,27 +96,14 @@ public class WeatherService {
                 .orElse("알 수 없음");
     }
 
-    /**
-     * 날씨 정보가 유효한지 검사합니다.
-     * - 마지막 업데이트가 3시간 이내인지 확인
-     * @param weatherInfo 날씨 정보
-     * @return 유효한 경우 true, 그렇지 않은 경우 false
-     */
+    // 유효성 검사: 마지막 업데이트가 3시간 이내인지 확인
     private boolean isValid(WeatherInfo weatherInfo) {
         LocalDateTime lastUpdated = weatherInfo.getModifyDate();
         if (lastUpdated == null) return false;
         return lastUpdated.isAfter(LocalDateTime.now().minusHours(3));
     }
 
-    /**
-     * 요청된 지역과 날짜의 날씨 정보를 업데이트합니다.
-     * @param info 기존 날씨 정보
-     * @param location 지역 이름
-     * @param lat 위도
-     * @param lon 경도
-     * @param date 요청된 날짜
-     * @return 업데이트된 날씨 정보
-     */
+    // 요청된 날짜에 따라 날씨 정보를 업데이트
     private WeatherInfo updateWeatherInfo(WeatherInfo info, String location, double lat, double lon, LocalDate date) {
         LocalDate today = LocalDate.now();
 
@@ -142,16 +125,9 @@ public class WeatherService {
         }
     }
 
-    /**
-     * 예보 API를 이용하여 날씨 정보를 업데이트합니다.
-     * @param info 기존 날씨 정보
-     * @param location 지역 이름
-     * @param lat 위도
-     * @param lon 경도
-     * @param date 요청된 날짜
-     * @return 업데이트된 날씨 정보
-     */
+    // 예보 API를 통해 날씨 정보를 업데이트
     private WeatherInfo updateFromForecastApi(WeatherInfo info, String location, double lat, double lon, LocalDate date) {
+        // OpenWeatherMap One Call API를 통해 예보 데이터 조회
         OneCallApiResponse response = weatherApiClient.fetchOneCallWeatherData(
                 lat,
                 lon,
@@ -160,28 +136,25 @@ public class WeatherService {
                 "kr"
         ).block(); // 블록킹 호출로 API 응답을 기다림
 
+        // 예보 데이터에서 요청된 날짜에 해당하는 DailyData 찾기
         DailyData matchedDaily = response.getDaily().stream()
                 .filter(d -> LocalDateTime.ofEpochSecond(d.getDt(), 0, ZoneOffset.UTC)
                         .toLocalDate().isEqual(date))
                 .findFirst()
                 .orElse(null);
 
+        // 해당 날짜 데이터가 없는 경우 예외 처리
         if (matchedDaily == null) {
             throw new IllegalArgumentException("해당 날짜(" + date + ")에 대한 예보 데이터가 존재하지 않습니다.");
         }
 
-        updateWeatherInfoFromDailyData(info, matchedDaily, location, date);
+        // 날씨 정보 갱신 및 저장
+        mapDailyDataToWeatherInfo(info, matchedDaily, location, date);
         return weatherRepository.save(info);
     }
 
-    /**
-     * 일별 날씨 데이터를 이용하여 기존 날씨 정보를 업데이트합니다.
-     * @param info 기존 날씨 정보
-     * @param data 일별 날씨 데이터
-     * @param location 지역 이름
-     * @param date 요청된 날짜
-     */
-    private void updateWeatherInfoFromDailyData(WeatherInfo info, DailyData data, String location, LocalDate date) {
+    // DailyData를 WeatherInfo로 매핑
+    private void mapDailyDataToWeatherInfo(WeatherInfo info, DailyData data, String location, LocalDate date) {
         info.setWeather(Weather.fromCode(data.getWeather().getFirst().getId()));
         info.setDailyTemperatureGap(data.getTemp().getMax() - data.getTemp().getMin());
         info.setFeelsLikeTemperature(data.getFeelsLike().getDay());

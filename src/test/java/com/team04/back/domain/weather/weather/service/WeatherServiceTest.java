@@ -180,12 +180,7 @@ class WeatherServiceTest {
         });
     }
 
-    /**
-     * 날씨 정보를 생성하는 헬퍼 메서드
-     * @param date 날씨 정보의 날짜
-     * @param modifiedDate 수정된 날짜
-     * @return 생성된 WeatherInfo 객체
-     */
+    // 날씨 정보를 생성하는 헬퍼 메서드
     private WeatherInfo createWeatherInfo(LocalDate date, LocalDateTime modifiedDate) {
         return WeatherInfo.builder()
                 .location(location)
@@ -200,10 +195,7 @@ class WeatherServiceTest {
                 .build();
     }
 
-    /**
-     * GeoReverseResponse 객체를 생성하는 헬퍼 메서드
-     * @return 생성된 GeoReverseResponse 객체
-     */
+    // GeoReverseResponse 객체를 생성하는 헬퍼 메서드
     private GeoReverseResponse createGeoReverseResponse() {
         GeoReverseResponse response = new GeoReverseResponse();
         response.setName(location);
@@ -215,21 +207,12 @@ class WeatherServiceTest {
         return response;
     }
 
-    /**
-     * OneCallApiResponse 객체를 생성하는 헬퍼 메서드
-     * @param date 단일 날짜에 대한 응답
-     * @return 생성된 OneCallApiResponse 객체
-     */
+    // OneCallApiResponse 객체를 생성하는 헬퍼 메서드
     private OneCallApiResponse createOneCallApiResponse(LocalDate date) {
         return createOneCallApiResponse(date, date);
     }
 
-    /**
-     * OneCallApiResponse 객체를 생성하는 헬퍼 메서드
-     * @param startDate 시작 날짜
-     * @param endDate 종료 날짜
-     * @return 생성된 OneCallApiResponse 객체
-     */
+    // OneCallApiResponse 객체를 생성하는 헬퍼 메서드
     private OneCallApiResponse createOneCallApiResponse(LocalDate startDate, LocalDate endDate) {
         OneCallApiResponse response = new OneCallApiResponse();
         List<DailyData> dailyDataList = new java.util.ArrayList<>();
