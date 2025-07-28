@@ -31,4 +31,11 @@ public class GlobalExceptionHandler {
 
         return rsData;
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<RsData<Void>> handle(IllegalArgumentException ex) {
+        return ResponseEntity
+                .badRequest()
+                .body(new RsData<>("400-1", ex.getMessage()));
+    }
 }
