@@ -154,4 +154,49 @@ public class CommentControllerTest {
                 .andExpect(jsonPath("$.resultCode").value("400-1"))
                 .andExpect(jsonPath("$.msg").value("location 파라미터 없이는 date 또는 feelsLikeTemperature 파라미터를 사용할 수 없습니다."));
     }
+
+    @Test
+    @DisplayName("커멘트 단건 조회")
+    public void t5() throws Exception {
+        Page<Comment> comments = commentService.findAll(PageRequest.of(0, 10));
+        int id = comments.getContent().get(0).getId();
+
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/v1/comments/" + id)
+                ).andDo(print());
+
+        Comment comment = commentService.findById(id).get();
+
+        resultActions
+                .andExpect(handler().handlerType(CommentController.class))
+                .andExpect(handler().methodName("getComment"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(comment.getId()))
+                .andExpect(jsonPath("$.email").value(comment.getEmail()))
+                .andExpect(jsonPath("$.imageUrl").value(comment.getImageUrl()))
+                .andExpect(jsonPath("$.sentence").value(comment.getSentence()))
+                .andExpect(jsonPath("$.tagString").value(comment.getTagString()))
+                .andExpect(jsonPath("$.weatherInfo.location").value(comment.getWeatherInfo().getLocation()))
+                .andExpect(jsonPath("$.weatherInfo.date").value(comment.getWeatherInfo().getDate().toString()))
+                .andExpect(jsonPath("$.weatherInfo.feelsLikeTemperature").value(comment.getWeatherInfo().getFeelsLikeTemperature()));
+    }
+
+    @Test
+    @DisplayName("커멘트 단건 조회 - 존재하지 않는 ID")
+    public void t6() throws Exception {
+        int id = Integer.MAX_VALUE; // 존재하지 않는 ID
+
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/v1/comments/" + id)
+                ).andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(CommentController.class))
+                .andExpect(handler().methodName("getComment"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.resultCode").value("404-1"))
+                .andExpect(jsonPath("$.msg").value("해당 데이터가 존재하지 않습니다."));
+        }
 }
