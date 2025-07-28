@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.team04.back.common.fixture.FixtureFactory.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -64,12 +65,12 @@ class ClothServiceTest {
         ExtraCloth mask = createExtraCloth("마스크", "mask.jpg", Weather.FOG);
         ExtraCloth umbrella = createExtraCloth("우산", "umbrella.jpg", Weather.HEAVY_RAIN);
 
-        when(extraClothRepository.findByWeather(hotWeather.getWeather()))
-            .thenReturn(List.of(mask));
-        when(extraClothRepository.findByWeather(mildWeather.getWeather()))
-            .thenReturn(List.of());
-        when(extraClothRepository.findByWeather(coldWeather.getWeather()))
-            .thenReturn(List.of(umbrella));
+        when(extraClothRepository.findDistinctByWeather(hotWeather.getWeather()))
+            .thenReturn(Set.of(mask));
+        when(extraClothRepository.findDistinctByWeather(mildWeather.getWeather()))
+            .thenReturn(Set.of());
+        when(extraClothRepository.findDistinctByWeather(coldWeather.getWeather()))
+            .thenReturn(Set.of(umbrella));
 
         Map<Category, List<Clothing>> result = clothService.getOutfitWithPeriod(weatherPlan);
 
