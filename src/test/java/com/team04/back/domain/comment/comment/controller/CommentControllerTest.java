@@ -42,24 +42,24 @@ public class CommentControllerTest {
 
         Pageable pageable = PageRequest.of(0, 10);
         Page<CommentDto> comments = commentService.findAll(pageable);
+        int size = comments.getContent().size();
 
         resultActions
                 .andExpect(handler().handlerType(CommentController.class))
                 .andExpect(handler().methodName("getComments"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.length()").value(comments.getContent().size()));
+                .andExpect(jsonPath("$.content.length()").value(size));
 
-        for (int i = 0; i < comments.getContent().size(); i++) {
-            CommentDto commentDto = comments.getContent().get(i);
+        for (int i = 0; i < size; i++) {
+            CommentDto commentDto = comments.getContent().get(size - i - 1); // 역순으로 조회
             resultActions
-                    .andExpect(jsonPath("$.content[%d].id".formatted(i)).value(commentDto.id()))
                     .andExpect(jsonPath("$.content[%d].email".formatted(i)).value(commentDto.email()))
                     .andExpect(jsonPath("$.content[%d].imageUrl".formatted(i)).value(commentDto.imageUrl()))
                     .andExpect(jsonPath("$.content[%d].sentence".formatted(i)).value(commentDto.sentence()))
                     .andExpect(jsonPath("$.content[%d].tagString".formatted(i)).value(commentDto.tagString()))
-                    .andExpect(jsonPath("$.content[%d].weatherInfo.location".formatted(i)).value(commentDto.weatherInfo().getLocation()))
-                    .andExpect(jsonPath("$.content[%d].weatherInfo.date".formatted(i)).value(commentDto.weatherInfo().getDate().toString()))
-                    .andExpect(jsonPath("$.content[%d].weatherInfo.feelsLikeTemperature".formatted(i)).value(commentDto.weatherInfo().getFeelsLikeTemperature()));
+                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.location".formatted(i)).value(commentDto.weatherInfoDto().location()))
+                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.date".formatted(i)).value(commentDto.weatherInfoDto().date().toString()))
+                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.feelsLikeTemperature".formatted(i)).value(commentDto.weatherInfoDto().feelsLikeTemperature()));
         }
     }
 
@@ -75,22 +75,23 @@ public class CommentControllerTest {
 
         Pageable pageable = PageRequest.of(0, 10);
         Page<CommentDto> comments = commentService.findByLocationAndDate("일본 삿포로", LocalDate.of(2025, 1, 1), pageable);
+        int size = comments.getContent().size();
 
         resultActions
                 .andExpect(handler().handlerType(CommentController.class))
                 .andExpect(handler().methodName("getComments"))
                 .andExpect(status().isOk());
 
-        for (int i = 0; i < comments.getContent().size(); i++) {
-            CommentDto commentDto = comments.getContent().get(i);
+        for (int i = 0; i < size; i++) {
+            CommentDto commentDto = comments.getContent().get(size - i - 1); // 역순으로 조회
             resultActions
                     .andExpect(jsonPath("$.content[%d].id".formatted(i)).value(commentDto.id()))
                     .andExpect(jsonPath("$.content[%d].email".formatted(i)).value(commentDto.email()))
                     .andExpect(jsonPath("$.content[%d].imageUrl".formatted(i)).value(commentDto.imageUrl()))
                     .andExpect(jsonPath("$.content[%d].sentence".formatted(i)).value(commentDto.sentence()))
                     .andExpect(jsonPath("$.content[%d].tagString".formatted(i)).value(commentDto.tagString()))
-                    .andExpect(jsonPath("$.content[%d].weatherInfo.location".formatted(i)).value(commentDto.weatherInfo().getLocation()))
-                    .andExpect(jsonPath("$.content[%d].weatherInfo.date".formatted(i)).value(commentDto.weatherInfo().getDate().toString()));
+                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.location".formatted(i)).value(commentDto.weatherInfoDto().location()))
+                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.date".formatted(i)).value(commentDto.weatherInfoDto().date().toString()));
         }
     }
 
@@ -106,22 +107,23 @@ public class CommentControllerTest {
 
         Pageable pageable = PageRequest.of(0, 10);
         Page<CommentDto> comments = commentService.findByLocationAndTemperature("일본 삿포로", -4.0, pageable);
+        int size = comments.getContent().size();
 
         resultActions
                 .andExpect(handler().handlerType(CommentController.class))
                 .andExpect(handler().methodName("getComments"))
                 .andExpect(status().isOk());
 
-        for (int i = 0; i < comments.getContent().size(); i++) {
-            CommentDto commentDto = comments.getContent().get(i);
+        for (int i = 0; i < size; i++) {
+            CommentDto commentDto = comments.getContent().get(size - i - 1); // 역순으로 조회
             resultActions
                     .andExpect(jsonPath("$.content[%d].id".formatted(i)).value(commentDto.id()))
                     .andExpect(jsonPath("$.content[%d].email".formatted(i)).value(commentDto.email()))
                     .andExpect(jsonPath("$.content[%d].imageUrl".formatted(i)).value(commentDto.imageUrl()))
                     .andExpect(jsonPath("$.content[%d].sentence".formatted(i)).value(commentDto.sentence()))
                     .andExpect(jsonPath("$.content[%d].tagString".formatted(i)).value(commentDto.tagString()))
-                    .andExpect(jsonPath("$.content[%d].weatherInfo.location".formatted(i)).value(commentDto.weatherInfo().getLocation()))
-                    .andExpect(jsonPath("$.content[%d].weatherInfo.feelsLikeTemperature".formatted(i)).value(commentDto.weatherInfo().getFeelsLikeTemperature()));
+                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.location".formatted(i)).value(commentDto.weatherInfoDto().location()))
+                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.feelsLikeTemperature".formatted(i)).value(commentDto.weatherInfoDto().feelsLikeTemperature()));
         }
     }
 
