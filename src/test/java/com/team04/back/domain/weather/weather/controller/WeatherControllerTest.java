@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-class WeatherControllerIntegrationTest {
+class WeatherControllerTest {
 
     @Autowired
     private MockMvc mvc;
@@ -48,7 +48,8 @@ class WeatherControllerIntegrationTest {
 
         // then
         result.andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(7));
+                .andExpect(jsonPath("$.length()").value(7))
+                .andExpect(jsonPath("$[0].location").value("서울"));
     }
 
     @Test
@@ -64,7 +65,9 @@ class WeatherControllerIntegrationTest {
 
         // then
         result.andExpect(status().isOk())
-                .andExpect(jsonPath("$.date").value(today.toString()));
+                .andExpect(jsonPath("$.date").value(today.toString()))
+                .andExpect(jsonPath("$.weather").exists())
+                .andExpect(jsonPath("$.location").value("서울"));
     }
 
     @Test
@@ -90,14 +93,16 @@ class WeatherControllerIntegrationTest {
                 .param("lon", lonStr));
 
         // then
-        result.andExpect(status().isBadRequest());
+        result.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.msg").exists());
     }
 
     @Test
-    @DisplayName("범위 외 날짜 요청 시 400 Bad Request")
+    @DisplayName("범위 외 날짜 요청 시 400 Bad Request + 예외 메시지 확인")
     void dateOutOfRange_returnsError() throws Exception {
         // given
         LocalDate tooFar = LocalDate.now().plusDays(100);
+        String expectedMessage = "해당 날짜(" + tooFar + ")에 대한 예보 데이터가 존재하지 않습니다.";
 
         // when
         ResultActions result = mvc.perform(get("/api/v1/weathers/{date}", tooFar)
@@ -105,6 +110,7 @@ class WeatherControllerIntegrationTest {
                 .param("lon", lonStr));
 
         // then
-        result.andExpect(status().isBadRequest());
+        result.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.msg").value(expectedMessage));
     }
 }

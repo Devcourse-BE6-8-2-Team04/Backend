@@ -1,6 +1,5 @@
 package com.team04.back.domain.weather.weather.service;
 
-import com.team04.back.domain.weather.weather.dto.WeatherInfoDto;
 import com.team04.back.domain.weather.weather.entity.WeatherInfo;
 import com.team04.back.domain.weather.weather.enums.Weather;
 import com.team04.back.domain.weather.weather.repository.WeatherRepository;
