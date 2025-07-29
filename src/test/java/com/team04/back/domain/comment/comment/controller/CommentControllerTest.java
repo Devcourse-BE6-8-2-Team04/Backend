@@ -127,23 +127,8 @@ public class CommentControllerTest {
     }
 
     @Test
-    @DisplayName("잘못된 파라미터로 인한 예외 처리")
-    public void t4() throws Exception {
-        ResultActions resultActions = mvc
-                .perform(
-                        get("/api/v1/comments")
-                                .param("feelsLikeTemperature", "-4.0")
-                ).andDo(print());
-
-        resultActions
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.resultCode").value("400-1"))
-                .andExpect(jsonPath("$.msg").value("location 파라미터 없이는 date 또는 feelsLikeTemperature 파라미터를 사용할 수 없습니다."));
-    }
-
-    @Test
     @DisplayName("커멘트 단건 조회")
-    public void t5() throws Exception {
+    public void t4() throws Exception {
         Page<Comment> comments = commentService.findAll(PageRequest.of(0, 10));
         int id = comments.getContent().get(0).getId();
 
@@ -170,7 +155,7 @@ public class CommentControllerTest {
 
     @Test
     @DisplayName("커멘트 단건 조회 - 존재하지 않는 ID")
-    public void t6() throws Exception {
+    public void t5() throws Exception {
         int id = Integer.MAX_VALUE; // 존재하지 않는 ID
 
         ResultActions resultActions = mvc

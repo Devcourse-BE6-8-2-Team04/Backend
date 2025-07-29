@@ -2,6 +2,8 @@ package com.team04.back.domain.comment.comment.service;
 
 import com.team04.back.domain.comment.comment.entity.Comment;
 import com.team04.back.domain.comment.comment.repository.CommentRepository;
+import com.team04.back.domain.comment.commentSearch.commentSearchCriteria.CommentSearchCriteria;
+import com.team04.back.domain.comment.commentSearch.commentSpecification.CommentSpecification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -56,5 +58,12 @@ public class CommentService {
 
     public Optional<Comment> findById(int id) {
         return commentRepository.findById(id);
+    }
+
+    public Page<Comment> findByCriteria(CommentSearchCriteria criteria, Pageable pageable) {
+        return commentRepository.findAll(
+                CommentSpecification.withCriteria(criteria),
+                pageable
+        );
     }
 }

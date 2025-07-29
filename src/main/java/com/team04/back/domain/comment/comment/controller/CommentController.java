@@ -3,6 +3,7 @@ package com.team04.back.domain.comment.comment.controller;
 import com.team04.back.domain.comment.comment.dto.CommentDto;
 import com.team04.back.domain.comment.comment.entity.Comment;
 import com.team04.back.domain.comment.comment.service.CommentService;
+import com.team04.back.domain.comment.commentSearch.commentSearchCriteria.CommentSearchCriteria;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -43,25 +44,14 @@ public class CommentController {
             @RequestParam(required = false) Integer month,
             @PageableDefault(size = 10, page = 0, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        Page<Comment> items;
+        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
+                .location(location)
+                .date(date)
+                .feelsLikeTemperature(feelsLikeTemperature)
+                .month(month)
+                .build();
 
-        if (location !=null && month != null && feelsLikeTemperature != null) {
-            // 검색 필터용 : 지역 + 월 + 체감 온도
-            items = commentService.findByLocationAndMonthAndTemperature(location, month, feelsLikeTemperature, pageable);
-        } else if (location != null && date != null) {
-            // 여행자 추천용 : 지역 + 날짜
-            items = commentService.findByLocationAndDate(location, date, pageable);
-        } else if (location != null && feelsLikeTemperature != null) {
-            // 검색 필터용 & 여행자 추천용 : 지역 + 체감 온도
-            items = commentService.findByLocationAndTemperature(location, feelsLikeTemperature, pageable);
-        } else if (location != null && month != null) {
-            // 검색 필터용 : 지역 + 월
-            items = commentService.findByLocationAndMonth(location, month, pageable);
-        } else {
-            // 전체 커멘트 조회
-            items = commentService.findAll(pageable);
-        }
-
+        Page<Comment> items = commentService.findByCriteria(criteria, pageable);
         return items.map(CommentDto::new);
     }
 
