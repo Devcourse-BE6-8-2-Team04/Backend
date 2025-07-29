@@ -163,9 +163,9 @@ public class CommentControllerTest {
                 .andExpect(jsonPath("$.imageUrl").value(comment.getImageUrl()))
                 .andExpect(jsonPath("$.sentence").value(comment.getSentence()))
                 .andExpect(jsonPath("$.tagString").value(comment.getTagString()))
-                .andExpect(jsonPath("$.weatherInfo.location").value(comment.getWeatherInfo().getLocation()))
-                .andExpect(jsonPath("$.weatherInfo.date").value(comment.getWeatherInfo().getDate().toString()))
-                .andExpect(jsonPath("$.weatherInfo.feelsLikeTemperature").value(comment.getWeatherInfo().getFeelsLikeTemperature()));
+                .andExpect(jsonPath("$.weatherInfoDto.location").value(comment.getWeatherInfo().getLocation()))
+                .andExpect(jsonPath("$.weatherInfoDto.date").value(comment.getWeatherInfo().getDate().toString()))
+                .andExpect(jsonPath("$.weatherInfoDto.feelsLikeTemperature").value(comment.getWeatherInfo().getFeelsLikeTemperature()));
     }
 
     @Test

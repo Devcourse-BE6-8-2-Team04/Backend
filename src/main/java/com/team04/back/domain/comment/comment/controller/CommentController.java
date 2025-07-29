@@ -1,6 +1,5 @@
 package com.team04.back.domain.comment.comment.controller;
 
-import com.team04.back.domain.comment.comment.entity.Comment;
 import com.team04.back.domain.comment.comment.dto.CommentDto;
 import com.team04.back.domain.comment.comment.entity.Comment;
 import com.team04.back.domain.comment.comment.service.CommentService;
