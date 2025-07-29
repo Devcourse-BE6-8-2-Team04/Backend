@@ -25,18 +25,20 @@ public class CommentController {
     private final CommentService commentService;
 
     /**
-     * location + date 조합 또는 location + feelsLikeTemperature 조합으로 커멘트 목록을 조회합니다.
-     * 위 조합이 아닌 경우, 전체 커멘트 목록을 조회합니다.
-     * 커멘트는 페이징 처리되어 반환됩니다.
-     *
-     * @param location             위치
-     * @param date                 날짜
-     * @param feelsLikeTemperature 체감 온도
-     * @param pageable             페이징 정보
-     * @return 커멘트 목록
+     * 이 API는 location, date, feelsLikeTemperature, month 파라미터를 사용하여 필터링된 커멘트 목록을 조회합니다.
+     * 필터링 조건이 없으면 전체 커멘트를 조회합니다.
+     * 여행자 추천 : location + date 조합 또는 location + feelsLikeTemperature 조합
+     * 검색 필터 : location + feelsLikeTemperature + month 조합 (3! = 6가지 조합)
+     * @param location 위치 필터링
+     * @param date 날짜 필터링
+     * @param feelsLikeTemperature 체감 온도 필터링
+     * @param month 월 필터링
+     * @param pageable 페이지 정보
+     * @return 커멘트 DTO 목록
      */
     @GetMapping
-    @Operation(summary = "커멘트 다건 조회", description = "location, date, feelsLikeTemperature 파라미터를 사용하여 커멘트 목록을 조회합니다.")
+    @Transactional(readOnly = true)
+    @Operation(summary = "커멘트 다건 조회", description = "필터링된 커멘트 목록을 조회합니다.")
     public Page<CommentDto> getComments(
             @RequestParam(required = false) String location,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,

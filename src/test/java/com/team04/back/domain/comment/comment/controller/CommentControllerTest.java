@@ -2,6 +2,7 @@ package com.team04.back.domain.comment.comment.controller;
 
 import com.team04.back.domain.comment.comment.entity.Comment;
 import com.team04.back.domain.comment.comment.service.CommentService;
+import com.team04.back.domain.comment.commentSearch.commentSearchCriteria.CommentSearchCriteria;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,8 +40,14 @@ public class CommentControllerTest {
                         get("/api/v1/comments")
                 ).andDo(print());
 
+        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
+                .location(null)
+                .date(null)
+                .feelsLikeTemperature(null)
+                .month(null)
+                .build();
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findAll(pageable);
+        Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
         int size = comments.getContent().size();
 
         resultActions
@@ -72,8 +79,14 @@ public class CommentControllerTest {
                                 .param("date", "2025-01-01")
                 ).andDo(print());
 
+        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
+                .location("일본 삿포로")
+                .date(LocalDate.of(2025, 1, 1))
+                .feelsLikeTemperature(null)
+                .month(null)
+                .build();
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByLocationAndDate("일본 삿포로", LocalDate.of(2025, 1, 1), pageable);
+        Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
         int size = comments.getContent().size();
 
         resultActions
@@ -104,8 +117,14 @@ public class CommentControllerTest {
                                 .param("feelsLikeTemperature", "-4.0")
                 ).andDo(print());
 
+        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
+                .location("일본 삿포로")
+                .date(null)
+                .feelsLikeTemperature(-4.0)
+                .month(null)
+                .build();
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByLocationAndTemperature("일본 삿포로", -4.0, pageable);
+        Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
         int size = comments.getContent().size();
 
         resultActions
@@ -129,7 +148,15 @@ public class CommentControllerTest {
     @Test
     @DisplayName("커멘트 단건 조회")
     public void t4() throws Exception {
-        Page<Comment> comments = commentService.findAll(PageRequest.of(0, 10));
+        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
+                .location(null)
+                .date(null)
+                .feelsLikeTemperature(null)
+                .month(null)
+                .build();
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
+
         int id = comments.getContent().get(0).getId();
 
         ResultActions resultActions = mvc
@@ -169,5 +196,5 @@ public class CommentControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.resultCode").value("404-1"))
                 .andExpect(jsonPath("$.msg").value("해당 데이터가 존재하지 않습니다."));
-        }
+    }
 }
