@@ -197,4 +197,43 @@ public class CommentControllerTest {
                 .andExpect(jsonPath("$.resultCode").value("404-1"))
                 .andExpect(jsonPath("$.msg").value("해당 데이터가 존재하지 않습니다."));
     }
+
+    @Test
+    @DisplayName("커멘트 조건 검색 - 월 필터링")
+    public void t6() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/v1/comments")
+                                .param("month", "1") // 1월 필터링
+                ).andDo(print());
+
+        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
+                .location(null)
+                .date(null)
+                .feelsLikeTemperature(null)
+                .month(1) // 1월 필터링
+                .build();
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
+        int size = comments.getContent().size();
+
+        resultActions
+                .andExpect(handler().handlerType(CommentController.class))
+                .andExpect(handler().methodName("getComments"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(size));
+
+        for (int i = 0; i < size; i++) {
+            Comment comment = comments.getContent().get(size - i - 1); // 역순
+            resultActions
+                    .andExpect(jsonPath("$.content[%d].id".formatted(i)).value(comment.getId()))
+                    .andExpect(jsonPath("$.content[%d].email".formatted(i)).value(comment.getEmail()))
+                    .andExpect(jsonPath("$.content[%d].imageUrl".formatted(i)).value(comment.getImageUrl()))
+                    .andExpect(jsonPath("$.content[%d].sentence".formatted(i)).value(comment.getSentence()))
+                    .andExpect(jsonPath("$.content[%d].tagString".formatted(i)).value(comment.getTagString()))
+                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.location".formatted(i)).value(comment.getWeatherInfo().getLocation()))
+                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.date".formatted(i)).value(comment.getWeatherInfo().getDate().toString()))
+                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.feelsLikeTemperature".formatted(i)).value(comment.getWeatherInfo().getFeelsLikeTemperature()));
+        }
+    }
 }
