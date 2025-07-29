@@ -1,7 +1,7 @@
 package com.team04.back.domain.comment.comment.dto;
 
 import com.team04.back.domain.comment.comment.entity.Comment;
-import com.team04.back.domain.weather.weather.entity.WeatherInfo;
+import com.team04.back.domain.weather.weather.dto.WeatherInfoDto;
 import org.springframework.lang.NonNull;
 
 public record CommentDto (
@@ -10,7 +10,7 @@ public record CommentDto (
         String imageUrl,
         @NonNull String sentence,
         @NonNull String tagString,
-        @NonNull WeatherInfo weatherInfo
+        @NonNull WeatherInfoDto weatherInfoDto
 ){
     public CommentDto(Comment comment){
         this(
@@ -19,7 +19,7 @@ public record CommentDto (
                 comment.getImageUrl(),
                 comment.getSentence(),
                 comment.getTagString(),
-                comment.getWeatherInfo()
+                new WeatherInfoDto(comment.getWeatherInfo())
         );
     }
 }

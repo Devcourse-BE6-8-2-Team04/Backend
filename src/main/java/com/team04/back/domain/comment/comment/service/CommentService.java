@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -15,15 +16,18 @@ import java.util.Optional;
 public class CommentService {
     private final CommentRepository commentRepository;
 
+    @Transactional(readOnly = true)
     public Page<Comment> findAll(Pageable pageable) {
         return commentRepository.findAll(pageable);
     }
 
+    @Transactional(readOnly = true)
     public Page<Comment> findByLocationAndDate(String location, LocalDate date, Pageable pageable) {
         int month = date.getMonthValue();
         return commentRepository.findByWeatherInfoLocationAndMonth(location, month, pageable);
     }
 
+    @Transactional(readOnly = true)
     public Page<Comment> findByLocationAndTemperature(String location, Double feelsLikeTemperature, Pageable pageable) {
         double minTemperature = feelsLikeTemperature - 2.5;
         double maxTemperature = feelsLikeTemperature + 2.5;

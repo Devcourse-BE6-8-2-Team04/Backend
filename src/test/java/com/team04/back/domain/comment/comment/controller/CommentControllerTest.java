@@ -2,10 +2,6 @@ package com.team04.back.domain.comment.comment.controller;
 
 import com.team04.back.domain.comment.comment.entity.Comment;
 import com.team04.back.domain.comment.comment.service.CommentService;
-import com.team04.back.domain.weather.weather.entity.WeatherInfo;
-import com.team04.back.domain.weather.weather.enums.Weather;
-import com.team04.back.domain.weather.weather.service.WeatherService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,18 +30,6 @@ public class CommentControllerTest {
     private MockMvc mvc;
     @Autowired
     private CommentService commentService;
-    @Autowired
-    private WeatherService weatherService;
-
-    @BeforeEach
-    void setUp() {
-        if(commentService.count() > 0) return;
-
-        WeatherInfo mockWeather = new WeatherInfo(Weather.CLEAR_SKY, 10.0, 20.0, 25.0, 15.0, "서울", LocalDate.of(2022, 1, 1));
-        weatherService.save(mockWeather);
-        Comment comment = new Comment("email", "password", "imageUrl", "sentence", "tagString", mockWeather);
-        commentService.save(comment);
-    }
 
     @Test
     @DisplayName("커멘트 다건 조회")
@@ -57,24 +41,24 @@ public class CommentControllerTest {
 
         Pageable pageable = PageRequest.of(0, 10);
         Page<Comment> comments = commentService.findAll(pageable);
+        int size = comments.getContent().size();
 
         resultActions
                 .andExpect(handler().handlerType(CommentController.class))
                 .andExpect(handler().methodName("getComments"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.length()").value(comments.getContent().size()));
+                .andExpect(jsonPath("$.content.length()").value(size));
 
-        for (int i = 0; i < comments.getContent().size(); i++) {
-            Comment comment = comments.getContent().get(i);
+        for (int i = 0; i < size; i++) {
+            Comment comment = comments.getContent().get(size - i - 1); // 역순으로 조회
             resultActions
-                    .andExpect(jsonPath("$.content[%d].id".formatted(i)).value(comment.getId()))
                     .andExpect(jsonPath("$.content[%d].email".formatted(i)).value(comment.getEmail()))
                     .andExpect(jsonPath("$.content[%d].imageUrl".formatted(i)).value(comment.getImageUrl()))
                     .andExpect(jsonPath("$.content[%d].sentence".formatted(i)).value(comment.getSentence()))
                     .andExpect(jsonPath("$.content[%d].tagString".formatted(i)).value(comment.getTagString()))
-                    .andExpect(jsonPath("$.content[%d].weatherInfo.location".formatted(i)).value(comment.getWeatherInfo().getLocation()))
-                    .andExpect(jsonPath("$.content[%d].weatherInfo.date".formatted(i)).value(comment.getWeatherInfo().getDate().toString()))
-                    .andExpect(jsonPath("$.content[%d].weatherInfo.feelsLikeTemperature".formatted(i)).value(comment.getWeatherInfo().getFeelsLikeTemperature()));
+                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.location".formatted(i)).value(comment.getWeatherInfo().getLocation()))
+                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.date".formatted(i)).value(comment.getWeatherInfo().getDate().toString()))
+                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.feelsLikeTemperature".formatted(i)).value(comment.getWeatherInfo().getFeelsLikeTemperature()));
         }
     }
 
@@ -84,28 +68,29 @@ public class CommentControllerTest {
         ResultActions resultActions = mvc
                 .perform(
                         get("/api/v1/comments")
-                                .param("location", "서울")
-                                .param("date", "2022-01-01")
+                                .param("location", "일본 삿포로")
+                                .param("date", "2025-01-01")
                 ).andDo(print());
 
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByLocationAndDate("서울", LocalDate.of(2022, 1, 1), pageable);
+        Page<Comment> comments = commentService.findByLocationAndDate("일본 삿포로", LocalDate.of(2025, 1, 1), pageable);
+        int size = comments.getContent().size();
 
         resultActions
                 .andExpect(handler().handlerType(CommentController.class))
                 .andExpect(handler().methodName("getComments"))
                 .andExpect(status().isOk());
 
-        for (int i = 0; i < comments.getContent().size(); i++) {
-            Comment comment = comments.getContent().get(i);
+        for (int i = 0; i < size; i++) {
+            Comment comment = comments.getContent().get(size - i - 1); // 역순으로 조회
             resultActions
                     .andExpect(jsonPath("$.content[%d].id".formatted(i)).value(comment.getId()))
                     .andExpect(jsonPath("$.content[%d].email".formatted(i)).value(comment.getEmail()))
                     .andExpect(jsonPath("$.content[%d].imageUrl".formatted(i)).value(comment.getImageUrl()))
                     .andExpect(jsonPath("$.content[%d].sentence".formatted(i)).value(comment.getSentence()))
                     .andExpect(jsonPath("$.content[%d].tagString".formatted(i)).value(comment.getTagString()))
-                    .andExpect(jsonPath("$.content[%d].weatherInfo.location".formatted(i)).value(comment.getWeatherInfo().getLocation()))
-                    .andExpect(jsonPath("$.content[%d].weatherInfo.date".formatted(i)).value(comment.getWeatherInfo().getDate().toString()));
+                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.location".formatted(i)).value(comment.getWeatherInfo().getLocation()))
+                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.date".formatted(i)).value(comment.getWeatherInfo().getDate().toString()));
         }
     }
 
@@ -115,28 +100,29 @@ public class CommentControllerTest {
         ResultActions resultActions = mvc
                 .perform(
                         get("/api/v1/comments")
-                                .param("location", "서울")
-                                .param("feelsLikeTemperature", "20.0")
+                                .param("location", "일본 삿포로")
+                                .param("feelsLikeTemperature", "-4.0")
                 ).andDo(print());
 
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByLocationAndTemperature("서울", 20.0, pageable);
+        Page<Comment> comments = commentService.findByLocationAndTemperature("일본 삿포로", -4.0, pageable);
+        int size = comments.getContent().size();
 
         resultActions
                 .andExpect(handler().handlerType(CommentController.class))
                 .andExpect(handler().methodName("getComments"))
                 .andExpect(status().isOk());
 
-        for (int i = 0; i < comments.getContent().size(); i++) {
-            Comment comment = comments.getContent().get(i);
+        for (int i = 0; i < size; i++) {
+            Comment comment = comments.getContent().get(size - i - 1); // 역순으로 조회
             resultActions
                     .andExpect(jsonPath("$.content[%d].id".formatted(i)).value(comment.getId()))
                     .andExpect(jsonPath("$.content[%d].email".formatted(i)).value(comment.getEmail()))
                     .andExpect(jsonPath("$.content[%d].imageUrl".formatted(i)).value(comment.getImageUrl()))
                     .andExpect(jsonPath("$.content[%d].sentence".formatted(i)).value(comment.getSentence()))
                     .andExpect(jsonPath("$.content[%d].tagString".formatted(i)).value(comment.getTagString()))
-                    .andExpect(jsonPath("$.content[%d].weatherInfo.location".formatted(i)).value(comment.getWeatherInfo().getLocation()))
-                    .andExpect(jsonPath("$.content[%d].weatherInfo.feelsLikeTemperature".formatted(i)).value(comment.getWeatherInfo().getFeelsLikeTemperature()));
+                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.location".formatted(i)).value(comment.getWeatherInfo().getLocation()))
+                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.feelsLikeTemperature".formatted(i)).value(comment.getWeatherInfo().getFeelsLikeTemperature()));
         }
     }
 
@@ -146,7 +132,7 @@ public class CommentControllerTest {
         ResultActions resultActions = mvc
                 .perform(
                         get("/api/v1/comments")
-                                .param("feelsLikeTemperature", "20.0")
+                                .param("feelsLikeTemperature", "-4.0")
                 ).andDo(print());
 
         resultActions
@@ -177,9 +163,9 @@ public class CommentControllerTest {
                 .andExpect(jsonPath("$.imageUrl").value(comment.getImageUrl()))
                 .andExpect(jsonPath("$.sentence").value(comment.getSentence()))
                 .andExpect(jsonPath("$.tagString").value(comment.getTagString()))
-                .andExpect(jsonPath("$.weatherInfo.location").value(comment.getWeatherInfo().getLocation()))
-                .andExpect(jsonPath("$.weatherInfo.date").value(comment.getWeatherInfo().getDate().toString()))
-                .andExpect(jsonPath("$.weatherInfo.feelsLikeTemperature").value(comment.getWeatherInfo().getFeelsLikeTemperature()));
+                .andExpect(jsonPath("$.weatherInfoDto.location").value(comment.getWeatherInfo().getLocation()))
+                .andExpect(jsonPath("$.weatherInfoDto.date").value(comment.getWeatherInfo().getDate().toString()))
+                .andExpect(jsonPath("$.weatherInfoDto.feelsLikeTemperature").value(comment.getWeatherInfo().getFeelsLikeTemperature()));
     }
 
     @Test

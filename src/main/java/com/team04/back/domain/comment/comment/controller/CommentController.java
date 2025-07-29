@@ -35,7 +35,6 @@ public class CommentController {
      * @return 커멘트 목록
      */
     @GetMapping
-    @Transactional(readOnly = true)
     @Operation(summary = "커멘트 다건 조회", description = "location, date, feelsLikeTemperature 파라미터를 사용하여 커멘트 목록을 조회합니다.")
     public Page<CommentDto> getComments(
             @RequestParam(required = false) String location,
