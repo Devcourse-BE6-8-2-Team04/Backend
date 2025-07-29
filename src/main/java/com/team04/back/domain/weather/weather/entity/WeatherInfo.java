@@ -17,15 +17,20 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @EntityListeners(AuditingEntityListener.class)
-public class WeatherInfo{
+public class WeatherInfo {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    // 날씨
+    // 날씨 (enum)
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Weather weather;
+
+    // 날씨 상태 요약 (한국어)
+    @Column
+    private String description;
 
     // 일교차
     @Column(nullable = false)
@@ -43,7 +48,35 @@ public class WeatherInfo{
     @Column(nullable = false)
     private Double minTemperature;
 
-    // 지역(지역구 기준)
+    // 강수 확률 (0.0 ~ 1.0)
+    @Column
+    private Double pop;
+
+    // 강수량 (mm)
+    @Column
+    private Double rain;
+
+    // 적설량 (mm)
+    @Column
+    private Double snow;
+
+    // 습도 (0~100%)
+    @Column
+    private Integer humidity;
+
+    // 풍속 (m/s)
+    @Column
+    private Double windSpeed;
+
+    // 풍향 (0~360°, 북: 0, 동: 90, 남: 180, 서: 270)
+    @Column
+    private Integer windDeg;
+
+    // 자외선 지수
+    @Column
+    private Double uvi;
+
+    // 지역 (지역구 기준)
     @Column(nullable = false)
     private String location;
 
@@ -57,7 +90,15 @@ public class WeatherInfo{
     @LastModifiedDate
     private LocalDateTime modifyDate;
 
-    public WeatherInfo(Weather weather, Double dailyTemperatureGap, Double feelsLikeTemperature, Double maxTemperature, Double minTemperature, String location, LocalDate date) {
+    public WeatherInfo(
+            Weather weather,
+            Double dailyTemperatureGap,
+            Double feelsLikeTemperature,
+            Double maxTemperature,
+            Double minTemperature,
+            String location,
+            LocalDate date
+    ) {
         this.weather = weather;
         this.dailyTemperatureGap = dailyTemperatureGap;
         this.feelsLikeTemperature = feelsLikeTemperature;

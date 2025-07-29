@@ -176,11 +176,19 @@ public class WeatherService {
     // DailyData를 WeatherInfo로 매핑
     private void mapDailyDataToWeatherInfo(WeatherInfo info, DailyData data, String location, LocalDate date) {
         info.setWeather(Weather.fromCode(data.getWeather().getFirst().getId()));
+        info.setDescription(info.getWeather().getDescription());
         info.setDailyTemperatureGap(data.getTemp().getMax() - data.getTemp().getMin());
         info.setFeelsLikeTemperature(data.getFeelsLike().getDay());
         info.setMaxTemperature(data.getTemp().getMax());
         info.setMinTemperature(data.getTemp().getMin());
         info.setLocation(location);
         info.setDate(date);
+        info.setPop(data.getPop());
+        info.setRain(data.getRain());
+        info.setSnow(data.getSnow());
+        info.setHumidity(data.getHumidity());
+        info.setWindSpeed(data.getWindSpeed());
+        info.setWindDeg(data.getWindDeg());
+        info.setUvi(data.getUvi());
     }
 }
