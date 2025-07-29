@@ -8,7 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 @RestControllerAdvice
@@ -38,4 +40,14 @@ public class GlobalExceptionHandler {
                 .badRequest()
                 .body(new RsData<>("400-1", ex.getMessage()));
     }
+
+    @ExceptionHandler(WebClientResponseException.Unauthorized.class)
+    public ResponseEntity<?> handleUnauthorized(WebClientResponseException ex) {
+        Map<String, String> body = Map.of(
+                "error", "외부 API 인증 오류",
+                "message", ex.getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
+    }
+
 }

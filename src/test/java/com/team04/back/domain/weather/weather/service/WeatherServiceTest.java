@@ -240,7 +240,7 @@ class WeatherServiceTest {
     private final String TEST_LOCATION = "Seoul";
 
     @BeforeEach
-    void setUp() {
+    void initial_value() {
         weatherInfoList = createWeatherInfoList(TEST_LOCATION, 30);
     }
 
