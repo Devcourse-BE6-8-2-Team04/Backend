@@ -28,10 +28,22 @@ public class CommentService {
     }
 
     @Transactional(readOnly = true)
-    public Page<Comment> findByLocationAndTemperature(String location, Double feelsLikeTemperature, Pageable pageable) {
+    public Page<Comment> findByLocationAndTemperature(String location, double feelsLikeTemperature, Pageable pageable) {
         double minTemperature = feelsLikeTemperature - 2.5;
         double maxTemperature = feelsLikeTemperature + 2.5;
         return commentRepository.findByWeatherInfoLocationAndFeelsLikeTemperature(location, minTemperature, maxTemperature, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Comment> findByLocationAndMonth(String location, int month, Pageable pageable) {
+        return commentRepository.findByWeatherInfoLocationAndMonth(location, month, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Comment> findByLocationAndMonthAndTemperature(String location, int month, double feelsLikeTemperature, Pageable pageable) {
+        double minTemperature = feelsLikeTemperature - 2.5;
+        double maxTemperature = feelsLikeTemperature + 2.5;
+        return commentRepository.findByWeatherInfoLocationAndMonthAndFeelsLikeTemperature(location, month, minTemperature, maxTemperature, pageable);
     }
 
     public void save(Comment comment) {

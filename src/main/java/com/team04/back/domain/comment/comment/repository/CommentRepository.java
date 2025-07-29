@@ -30,8 +30,22 @@ public interface CommentRepository extends JpaRepository<Comment, Integer> {
             """)
     Page<Comment> findByWeatherInfoLocationAndFeelsLikeTemperature(
             @Param("location") String location,
-            @Param("minTemperature") Double minTemperature,
-            @Param("maxTemperature") Double maxTemperature,
+            @Param("minTemperature") double minTemperature,
+            @Param("maxTemperature") double maxTemperature,
+            Pageable pageable
+    );
+
+    @Query("""
+            SELECT c FROM Comment c
+            WHERE c.weatherInfo.location LIKE CONCAT('%', :location, '%')
+            AND EXTRACT(MONTH FROM c.weatherInfo.date) = :month
+            AND c.weatherInfo.feelsLikeTemperature BETWEEN :minTemperature AND :maxTemperature
+            """)
+    Page<Comment> findByWeatherInfoLocationAndMonthAndFeelsLikeTemperature(
+            @Param("location") String location,
+            @Param("month") int month,
+            @Param("minTemperature") double minTemperature,
+            @Param("maxTemperature") double maxTemperature,
             Pageable pageable
     );
 }
