@@ -43,4 +43,19 @@ public class WeatherController {
         WeatherInfo weatherInfo = weatherService.getWeatherInfo(lat, lon, date);
         return new WeatherInfoDto(weatherInfo);
     }
+
+    @GetMapping("/location")
+    @Operation(summary = "위치별 날씨 조회", description = "지명과 위도와 경도를 이용하여 해당 위치의 날씨 정보를 조회합니다.")
+    public List<WeatherInfoDto> getWeatherByLocation(
+            @RequestParam String location,
+            @RequestParam double lat,
+            @RequestParam double lon,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end
+    ) {
+        List<WeatherInfo> weatherInfos = weatherService.getWeatherInfos(location, lat, lon, start, end);
+        return weatherInfos.stream()
+                .map(WeatherInfoDto::new)
+                .toList();
+    }
 }
