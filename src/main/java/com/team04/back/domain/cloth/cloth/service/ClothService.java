@@ -1,7 +1,8 @@
 package com.team04.back.domain.cloth.cloth.service;
 
-import com.team04.back.domain.cloth.cloth.entity.Clothing;
+import com.team04.back.domain.cloth.cloth.dto.CategoryClothDto;
 import com.team04.back.domain.cloth.cloth.entity.ClothInfo;
+import com.team04.back.domain.cloth.cloth.entity.Clothing;
 import com.team04.back.domain.cloth.cloth.entity.ExtraCloth;
 import com.team04.back.domain.cloth.cloth.enums.Category;
 import com.team04.back.domain.cloth.cloth.repository.ClothRepository;
@@ -19,6 +20,11 @@ import java.util.*;
 public class ClothService {
     private final ClothRepository clothRepository;
     private final ExtraClothRepository extraClothRepository;
+
+    public List<CategoryClothDto> findClothByWeather(Double feelsLikeTemperature) {
+        List<CategoryClothDto> cloths = clothRepository.findByMinFeelsLikeLessThanEqualAndMaxFeelsLikeGreaterThanEqual(feelsLikeTemperature, feelsLikeTemperature);
+        return cloths;
+    }
 
     public Map<Category, List<Clothing>> getOutfitWithPeriod(List<WeatherInfo> weatherPlan) {
         Map<Category, List<Clothing>> recommendedClothesMap = new HashMap<>();
