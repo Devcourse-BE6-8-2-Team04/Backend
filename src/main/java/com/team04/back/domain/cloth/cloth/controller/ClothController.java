@@ -10,7 +10,6 @@ import com.team04.back.domain.weather.weather.entity.WeatherInfo;
 import com.team04.back.domain.weather.weather.service.WeatherService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -53,7 +52,7 @@ public class ClothController {
     record TripSchedule(
             @FutureOrPresent
             LocalDate start,
-            @Future
+            @FutureOrPresent
             LocalDate end,
             @Min(-90) @Max(90)
             double lat,
