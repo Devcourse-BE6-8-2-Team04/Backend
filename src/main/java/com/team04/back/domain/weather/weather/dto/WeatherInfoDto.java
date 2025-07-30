@@ -8,7 +8,8 @@ import java.time.LocalDate;
 public record WeatherInfoDto(
         @NotNull int id,
         @NotNull String weather,
-        String description,
+        Integer weatherCode,
+        String weatherDescription,
         @NotNull Double dailyTemperatureGap,
         @NotNull Double feelsLikeTemperature,
         @NotNull Double maxTemperature,
@@ -27,6 +28,7 @@ public record WeatherInfoDto(
         this (
                 weatherInfo.getId(),
                 weatherInfo.getWeather().name(),
+                weatherInfo.getWeather().getCode(),
                 weatherInfo.getDescription(),
                 weatherInfo.getDailyTemperatureGap(),
                 weatherInfo.getFeelsLikeTemperature(),
