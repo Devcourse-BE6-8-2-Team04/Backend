@@ -23,8 +23,12 @@ public class ClothService {
     private final ExtraClothRepository extraClothRepository;
 
     public List<CategoryClothDto> findClothByWeather(Double feelsLikeTemperature) {
-        List<CategoryClothDto> cloths = clothRepository.findByMinFeelsLikeLessThanEqualAndMaxFeelsLikeGreaterThanEqual(feelsLikeTemperature, feelsLikeTemperature);
-        return cloths;
+        List<ClothInfo> cloths = clothRepository.findByMinFeelsLikeLessThanEqualAndMaxFeelsLikeGreaterThanEqual(feelsLikeTemperature, feelsLikeTemperature);
+        List<CategoryClothDto> clothDtos = cloths.stream()
+                .map(cloth -> new CategoryClothDto(cloth.getClothName(), cloth.getImageUrl(), cloth.getCategory()))
+                .toList();
+
+        return clothDtos;
     }
 
     public Map<Category, List<Clothing>> getOutfitWithPeriod(List<WeatherInfo> weatherPlan) {
