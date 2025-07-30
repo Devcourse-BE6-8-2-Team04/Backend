@@ -3,7 +3,7 @@ package com.team04.back.domain.comment.comment.controller;
 import com.team04.back.domain.comment.comment.dto.CommentDto;
 import com.team04.back.domain.comment.comment.entity.Comment;
 import com.team04.back.domain.comment.comment.service.CommentService;
-import com.team04.back.global.exception.ServiceException;
+import com.team04.back.domain.comment.commentSearch.commentSearchCriteria.CommentSearchCriteria;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -25,37 +25,35 @@ public class CommentController {
     private final CommentService commentService;
 
     /**
-     * location + date 조합 또는 location + feelsLikeTemperature 조합으로 커멘트 목록을 조회합니다.
-     * 위 조합이 아닌 경우, 전체 커멘트 목록을 조회합니다.
-     * 커멘트는 페이징 처리되어 반환됩니다.
-     * @param location 위치
-     * @param date 날짜
-     * @param feelsLikeTemperature 체감 온도
-     * @param pageable 페이징 정보
-     * @return 커멘트 목록
+     * 이 API는 location, date, feelsLikeTemperature, month 파라미터를 사용하여 필터링된 커멘트 목록을 조회합니다.
+     * 필터링 조건이 없으면 전체 커멘트를 조회합니다.
+     * 여행자 추천 : location + date 조합 또는 location + feelsLikeTemperature 조합
+     * 검색 필터 : location + feelsLikeTemperature + month 조합 (3! = 6가지 조합)
+     * @param location 위치 필터링
+     * @param date 날짜 필터링
+     * @param feelsLikeTemperature 체감 온도 필터링
+     * @param month 월 필터링
+     * @param pageable 페이지 정보
+     * @return 커멘트 DTO 목록
      */
     @GetMapping
-    @Operation(summary = "커멘트 다건 조회", description = "location, date, feelsLikeTemperature 파라미터를 사용하여 커멘트 목록을 조회합니다.")
+    @Transactional(readOnly = true)
+    @Operation(summary = "커멘트 다건 조회", description = "필터링된 커멘트 목록을 조회합니다.")
     public Page<CommentDto> getComments(
             @RequestParam(required = false) String location,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @RequestParam(required = false) Double feelsLikeTemperature,
+            @RequestParam(required = false) Integer month,
             @PageableDefault(size = 10, page = 0, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        if (location == null && (date != null || feelsLikeTemperature != null)) {
-            throw new ServiceException("400-1", "location 파라미터 없이는 date 또는 feelsLikeTemperature 파라미터를 사용할 수 없습니다.");
-        }
+        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
+                .location(location)
+                .date(date)
+                .feelsLikeTemperature(feelsLikeTemperature)
+                .month(month)
+                .build();
 
-        Page<Comment> items;
-
-        if (location != null && date != null) {
-            items = commentService.findByLocationAndDate(location, date, pageable);
-        } else if (location != null && feelsLikeTemperature != null) {
-            items = commentService.findByLocationAndTemperature(location, feelsLikeTemperature, pageable);
-        } else {
-            items = commentService.findAll(pageable);
-        }
-
+        Page<Comment> items = commentService.findByCriteria(criteria, pageable);
         return items.map(CommentDto::new);
     }
 
