@@ -2,6 +2,7 @@ package com.team04.back.domain.cloth.cloth.controller;
 
 import com.team04.back.domain.cloth.cloth.dto.CategoryClothDto;
 import com.team04.back.domain.cloth.cloth.dto.WeatherClothResponseDto;
+import com.team04.back.domain.cloth.cloth.entity.ExtraCloth;
 import com.team04.back.domain.cloth.cloth.enums.Category;
 import com.team04.back.domain.cloth.cloth.service.ClothService;
 import com.team04.back.domain.weather.weather.entity.WeatherInfo;
@@ -15,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -69,8 +71,45 @@ class ClothControllerUnitTest {
         WeatherClothResponseDto response = clothController.getClothDetails(TEST_LATITUDE, TEST_LONGITUDE); // 체감온도 해당하는 옷 정보 가져오기
 
         // then
-        assertThat(response.getWeatherInfo().getWeather()).isEqualTo(WEATHER_DESC);
+        assertThat(response.getWeatherInfo().weather()).isEqualTo(WEATHER_DESC.name());
         assertThat(response.getClothList()).hasSize(2);
         assertThat(response.getClothList().get(0).getClothName()).isEqualTo("반팔티");
     }
+    @Test
+    void getClothDetails_WithHeatWave_ReturnsExtraClothes() {
+        // given
+        WeatherInfo mockWeatherInfo = new WeatherInfo();
+        mockWeatherInfo.setWeather(Weather.CLEAR_SKY); // 아무 코드나 줘도 됨, 체감온도로 판단
+        mockWeatherInfo.setFeelsLikeTemperature(33.0); // 폭염 조건
+        mockWeatherInfo.setMaxTemperature(36.0);
+        mockWeatherInfo.setMinTemperature(28.0);
+        mockWeatherInfo.setLocation(LOCATION);
+
+        List<CategoryClothDto> mockCloths = List.of(CLOTH_1, CLOTH_2);
+
+        Set<ExtraCloth> mockExtraClothes = Set.of(
+                ExtraCloth.create("선크림", "/images/sunscreen.png", Weather.HEAT_WAVE),
+                ExtraCloth.create("모자", "/images/hat.png", Weather.HEAT_WAVE)
+        );
+
+        when(weatherService.getWeatherInfo(anyDouble(), anyDouble(), any()))
+                .thenReturn(mockWeatherInfo);
+
+        when(clothService.findClothByWeather(mockWeatherInfo.getFeelsLikeTemperature()))
+                .thenReturn(mockCloths);
+
+        when(clothService.getExtraClothes(mockWeatherInfo))
+                .thenReturn(mockExtraClothes);
+
+        // when
+        WeatherClothResponseDto response = clothController.getClothDetails(TEST_LATITUDE, TEST_LONGITUDE);
+
+        // then
+        assertThat(response.getWeatherInfo().weather()).isEqualTo(Weather.CLEAR_SKY.name());
+        assertThat(response.getClothList()).hasSize(2);
+        assertThat(response.getExtraCloth()).hasSize(2);
+        assertThat(response.getExtraCloth().stream()
+                .anyMatch(extra -> extra.getClothName().equals("선크림"))).isTrue();
+    }
+
 }
