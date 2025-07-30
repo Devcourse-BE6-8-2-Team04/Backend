@@ -4,5 +4,3 @@ spring:
     username: sa                         # 기본 사용자 이름
     password:                            # 비밀번호 없음
     driver-class-name: org.h2.Driver     # H2 DB용 드라이버
-  config:
-    import: optional:classpath:application-secret.yml # 비밀 설정 파일을 선택적으로 가져오기 (존재할 경우만)
