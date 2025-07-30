@@ -6,6 +6,8 @@ import com.team04.back.domain.weather.weather.repository.WeatherRepository;
 import com.team04.back.infra.weather.WeatherApiClient;
 import com.team04.back.infra.weather.dto.DailyData;
 import com.team04.back.infra.weather.dto.OneCallApiResponse;
+import com.team04.back.infra.weather.dto.TimeMachineApiResponse;
+import com.team04.back.infra.weather.dto.TimeMachineData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,8 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import java.time.LocalDate;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -129,9 +129,7 @@ public class WeatherService {
 
         // 요청된 날짜가 오늘 이전인 경우
         if (date.isBefore(today)) {
-            // 추후 필요 시 과거 날씨 데이터 업데이트 기능 구현
-            // return updateFromPastWeatherApi(info, location, lat, lon, date);
-            throw new IllegalArgumentException("해당 날짜(" + date + ")에 대한 예보 데이터가 존재하지 않습니다.");
+            return updateFromTimeMachineApi(info, location, lat, lon, date);
         }
         // 요청된 날짜가 오늘부터 7일 이내인 경우
         else if (!date.isAfter(today.plusDays(7))) {
@@ -186,6 +184,59 @@ public class WeatherService {
         info.setPop(data.getPop());
         info.setRain(data.getRain());
         info.setSnow(data.getSnow());
+        info.setHumidity(data.getHumidity());
+        info.setWindSpeed(data.getWindSpeed());
+        info.setWindDeg(data.getWindDeg());
+        info.setUvi(data.getUvi());
+    }
+
+    private WeatherInfo updateFromTimeMachineApi(WeatherInfo info, String location, double lat, double lon, LocalDate date) {
+        // LocalDate를 Unix 타임스탬프로 변환, API요구사항
+        long dt = date.atStartOfDay(ZoneOffset.UTC).toEpochSecond();
+
+        TimeMachineApiResponse response = weatherApiClient.fetchTimeMachineWeatherData(
+                lat,
+                lon,
+                dt,
+                "metric",
+                "kr"
+        ).block();
+
+        if (response == null || response.getData() == null || response.getData().isEmpty()) {
+            throw new IllegalArgumentException("해당 날짜(" + date + ")에 대한 과거 날씨 데이터가 존재하지 않습니다.");
+        }
+
+
+        List<TimeMachineData> hourlyData = response.getData();
+
+        double minTemp = hourlyData.stream().mapToDouble(TimeMachineData::getTemp).min().orElse(0.0);
+        double maxTemp = hourlyData.stream().mapToDouble(TimeMachineData::getTemp).max().orElse(0.0);
+
+        TimeMachineData data = hourlyData.get(0);
+
+        mapTimeMachineDataToWeatherInfo(info, data, location, date, minTemp, maxTemp);
+        return weatherRepository.save(info);
+    }
+
+    // TimeMachineData를 WeatherInfo로 매핑
+    private void mapTimeMachineDataToWeatherInfo(WeatherInfo info, TimeMachineData data, String location, LocalDate date, double minTemp, double maxTemp) {
+        Weather weather = Weather.fromCode(data.getWeather().getFirst().getId());
+        double pop = 0.0;
+        int weatherCode = weather.getCode();
+
+        if ((weatherCode >= 200 && weatherCode < 400) || (weatherCode >= 500 && weatherCode < 700)) {
+            pop = 1.0;
+        }
+
+        info.setWeather(weather);
+        info.setDescription(data.getWeather().getFirst().getDescription());
+        info.setDailyTemperatureGap(maxTemp - minTemp);
+        info.setFeelsLikeTemperature(data.getFeelsLike());
+        info.setMaxTemperature(maxTemp);
+        info.setMinTemperature(minTemp);
+        info.setLocation(location);
+        info.setDate(date);
+        info.setPop(pop);
         info.setHumidity(data.getHumidity());
         info.setWindSpeed(data.getWindSpeed());
         info.setWindDeg(data.getWindDeg());

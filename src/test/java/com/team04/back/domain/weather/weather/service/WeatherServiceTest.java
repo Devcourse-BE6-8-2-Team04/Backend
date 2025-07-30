@@ -57,12 +57,16 @@ class WeatherServiceTest {
     private String location;
     private LocalDate today;
 
+    private List<WeatherInfo> weatherInfoList;
+    private final String TEST_LOCATION = "Seoul";
+
     @BeforeEach
     void setUp() {
         lat = 37.5665;
         lon = 126.9780;
         location = "서울";
         today = LocalDate.now();
+        weatherInfoList = createWeatherInfoList(TEST_LOCATION, 30);
     }
 
     @Test
@@ -234,14 +238,6 @@ class WeatherServiceTest {
         }
         response.setDaily(dailyDataList);
         return response;
-    }
-
-    private List<WeatherInfo> weatherInfoList;
-    private final String TEST_LOCATION = "Seoul";
-
-    @BeforeEach
-    void initial_value() {
-        weatherInfoList = createWeatherInfoList(TEST_LOCATION, 30);
     }
 
     @Test
