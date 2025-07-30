@@ -8,6 +8,7 @@ import com.team04.back.domain.cloth.cloth.enums.Category;
 import com.team04.back.domain.cloth.cloth.repository.ClothRepository;
 import com.team04.back.domain.cloth.cloth.repository.ExtraClothRepository;
 import com.team04.back.domain.weather.weather.entity.WeatherInfo;
+import com.team04.back.domain.weather.weather.enums.Weather;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,9 +52,35 @@ public class ClothService {
         return recommendedClothesMap;
     }
 
-    private Set<ExtraCloth> getExtraClothes(WeatherInfo weather) {
-        Set<ExtraCloth> extraCloths = extraClothRepository.findDistinctByWeather(weather.getWeather());
-        return extraCloths;
+    public Set<ExtraCloth> getExtraClothes(WeatherInfo weather) {
+        Weather weatherGroup = getWeatherGroup(weather);
+        return extraClothRepository.findDistinctByWeather(weatherGroup);
+
+    }
+
+    private Weather getWeatherGroup(WeatherInfo weather) {
+        int code = weather.getWeather().getCode();
+
+        // 폭염- 체감기온 30 이상
+        if (weather.getFeelsLikeTemperature() != null && 30 <= weather.getFeelsLikeTemperature()) {
+            return Weather.HEAT_WAVE;
+        }
+
+        // 비 또는 뇌우
+        if (200 <= code && code < 400 || 500 <= code && code < 600)
+            return Weather.MODERATE_RAIN;
+        //눈
+        if ( 600 <= code && code < 700)
+            return Weather.SNOW;
+
+        // 안개 또는 먼지
+        if (700 <= code && code < 800)
+            return Weather.MIST;
+
+        // 그외에는 맑은 하늘로 간주
+        return Weather.CLEAR_SKY;
+
+
     }
 
 }

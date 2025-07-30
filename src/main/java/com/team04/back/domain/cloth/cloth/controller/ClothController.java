@@ -1,11 +1,14 @@
 package com.team04.back.domain.cloth.cloth.controller;
 
 import com.team04.back.domain.cloth.cloth.dto.CategoryClothDto;
+import com.team04.back.domain.cloth.cloth.dto.ExtraClothDto;
 import com.team04.back.domain.cloth.cloth.dto.OutfitResponse;
 import com.team04.back.domain.cloth.cloth.dto.WeatherClothResponseDto;
 import com.team04.back.domain.cloth.cloth.entity.Clothing;
+import com.team04.back.domain.cloth.cloth.entity.ExtraCloth;
 import com.team04.back.domain.cloth.cloth.enums.Category;
 import com.team04.back.domain.cloth.cloth.service.ClothService;
+import com.team04.back.domain.weather.weather.dto.WeatherInfoDto;
 import com.team04.back.domain.weather.weather.entity.WeatherInfo;
 import com.team04.back.domain.weather.weather.service.WeatherService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,6 +25,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/cloth")
@@ -44,8 +49,15 @@ public class ClothController {
         // 날씨 정보에 따라 옷 정보 가져오기
         List<CategoryClothDto> cloths = clothService.findClothByWeather(weatherInfo.getFeelsLikeTemperature());
 
+        // 날씨 정보에 따라 추가 옷 정보 가져오기
+        Set<ExtraCloth> extraCloth = clothService.getExtraClothes(weatherInfo);
+
         // 날씨 정보와 옷 정보를 포함한 응답 DTO 리턴
-        return new WeatherClothResponseDto(weatherInfo, cloths);
+        WeatherInfoDto weatherInfoDto = new WeatherInfoDto(weatherInfo);
+        Set<ExtraClothDto> extraClothDto  =extraCloth.stream()
+                .map(ExtraClothDto::new)
+                .collect(Collectors.toSet());
+        return new WeatherClothResponseDto(weatherInfoDto, cloths, extraClothDto);
     }
 
     record TripSchedule(

@@ -26,7 +26,6 @@ import static com.team04.back.common.fixture.FixtureFactory.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-
 @ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 class ClothServiceTest {
@@ -54,30 +53,28 @@ class ClothServiceTest {
         ClothInfo formalShirt = createClothInfo(Category.FORMAL_OFFICE, 10.0, 20.0);
         ClothInfo runningShoes = createClothInfo(Category.OUTDOOR, 18.0, 28.0);
 
-
         when(clothRepository.findByTemperature(hotWeather.getFeelsLikeTemperature()))
-            .thenReturn(List.of(summerTee, shorts, runningShoes));
+                .thenReturn(List.of(summerTee, shorts, runningShoes));
         when(clothRepository.findByTemperature(mildWeather.getFeelsLikeTemperature()))
-            .thenReturn(List.of(springJacket, jeans, formalShirt));
+                .thenReturn(List.of(springJacket, jeans, formalShirt));
         when(clothRepository.findByTemperature(coldWeather.getFeelsLikeTemperature()))
-            .thenReturn(List.of(winterCoat, scarf));
+                .thenReturn(List.of(winterCoat, scarf));
 
         ExtraCloth mask = createExtraCloth("마스크", "mask.jpg", Weather.FOG);
         ExtraCloth umbrella = createExtraCloth("우산", "umbrella.jpg", Weather.HEAVY_RAIN);
 
-        when(extraClothRepository.findDistinctByWeather(hotWeather.getWeather()))
-            .thenReturn(Set.of(mask));
-        when(extraClothRepository.findDistinctByWeather(mildWeather.getWeather()))
-            .thenReturn(Set.of());
-        when(extraClothRepository.findDistinctByWeather(coldWeather.getWeather()))
-            .thenReturn(Set.of(umbrella));
+        when(extraClothRepository.findDistinctByWeather(Weather.CLEAR_SKY))
+                .thenReturn(Set.of(mask));
+        when(extraClothRepository.findDistinctByWeather(Weather.MODERATE_RAIN))
+                .thenReturn(Set.of(umbrella));
 
         Map<Category, List<Clothing>> result = clothService.getOutfitWithPeriod(weatherPlan);
 
         assertThat(result).isNotNull();
 
         assertThat(result).containsKey(Category.CASUAL_DAILY);
-        assertThat(result.get(Category.CASUAL_DAILY)).containsExactlyInAnyOrder(summerTee, shorts, springJacket, jeans, winterCoat);
+        assertThat(result.get(Category.CASUAL_DAILY)).containsExactlyInAnyOrder(
+                summerTee, shorts, springJacket, jeans, winterCoat);
         assertThat(result.get(Category.CASUAL_DAILY)).hasSize(5);
 
         assertThat(result).containsKey(Category.FORMAL_OFFICE);
@@ -88,6 +85,7 @@ class ClothServiceTest {
         assertThat(result.get(Category.OUTDOOR)).containsExactlyInAnyOrder(runningShoes, scarf);
         assertThat(result.get(Category.OUTDOOR)).hasSize(2);
 
+        // EXTRA 카테고리 검증
         assertThat(result).containsKey(Category.EXTRA);
         assertThat(result.get(Category.EXTRA)).containsExactlyInAnyOrder(mask, umbrella);
         assertThat(result.get(Category.EXTRA)).hasSize(2);
