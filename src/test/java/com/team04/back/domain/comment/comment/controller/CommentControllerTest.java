@@ -277,4 +277,38 @@ public class CommentControllerTest {
                 .andExpect(jsonPath("$.msg").value("비밀번호가 일치합니다."))
                 .andExpect(jsonPath("$.data").value(true));
     }
+
+    @Test
+    @DisplayName("커멘트 비밀번호 검증 - 잘못된 비밀번호")
+    public void t8() throws Exception {
+        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
+                .location(null)
+                .date(null)
+                .feelsLikeTemperature(null)
+                .month(null)
+                .build();
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
+
+        int id = comments.getContent().get(0).getId();
+
+        ResultActions resultActions = mvc
+                .perform(
+                        post("/api/v1/comments/" + id + "/verify-password")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                            "password": "wrong-password"
+                                        }
+                                        """)
+                ).andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(CommentController.class))
+                .andExpect(handler().methodName("verifyPassword"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.resultCode").value("400-1"))
+                .andExpect(jsonPath("$.msg").value("비밀번호가 일치하지 않습니다."))
+                .andExpect(jsonPath("$.data").value(false));
+    }
 }

@@ -85,10 +85,16 @@ public class CommentController {
             @RequestBody @NonNull verifyPasswordReqBody passwordReqBody
     ) {
         Comment comment = commentService.findById(id).get();
+
+        boolean isVerified = commentService.verifyPassword(comment, passwordReqBody.password());
+        if (!isVerified) {
+            return new RsData<>("400-1", "비밀번호가 일치하지 않습니다.", false);
+        }
+
         return new RsData<>(
                 "200-1",
                 "비밀번호가 일치합니다.",
-                commentService.verifyPassword(comment, passwordReqBody.password())
+                true
         );
     }
 }
