@@ -73,10 +73,15 @@ public enum Weather {
     CLEAR_SKY(800, "맑은 하늘"),
 
     // Group 80x: Clouds
+
     FEW_CLOUDS(801, "약간의 구름"),
     SCATTERED_CLOUDS(802, "흩어진 구름"),
     BROKEN_CLOUDS(803, "부서진 구름"),
-    OVERCAST_CLOUDS(804, "흐린 하늘");
+    OVERCAST_CLOUDS(804, "흐린 하늘"),
+
+
+    // 폭염
+    HEAT_WAVE(900, "폭염");
 
     private final int code;
     private final String description;
