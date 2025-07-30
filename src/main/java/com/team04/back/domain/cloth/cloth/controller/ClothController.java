@@ -13,9 +13,9 @@ import com.team04.back.domain.weather.weather.entity.WeatherInfo;
 import com.team04.back.domain.weather.weather.service.WeatherService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.FutureOrPresent;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -61,23 +62,35 @@ public class ClothController {
     }
 
     record TripSchedule(
-            @NotBlank
-            String place,
             @FutureOrPresent
             LocalDate start,
-            @Future
-            LocalDate end
+            @FutureOrPresent
+            LocalDate end,
+            @Min(-90) @Max(90)
+            double lat,
+            @Min(-180) @Max(180)
+            double lon
     ) {
         public TripSchedule {
-            if (start != null && end != null && !start.isBefore(end)) {
-                throw new IllegalArgumentException("시작 날짜는 종료 날짜보다 이전이어야 합니다.");
+            if (start != null && end != null) {
+                if (!start.isBefore(end)) {
+                    throw new IllegalArgumentException("시작 날짜는 종료 날짜보다 이전이어야 합니다.");
+                }
+                if (ChronoUnit.DAYS.between(start, end) > 30) {
+                    throw new IllegalArgumentException("최대 30일까지 조회할 수 있습니다.");
+                }
             }
         }
     }
 
     @GetMapping
     public OutfitResponse getOutfitWithPeriod(TripSchedule tripSchedule) {
-        List<WeatherInfo> duration = weatherService.getDurationWeather(tripSchedule.place, tripSchedule.start, tripSchedule.end);
+        List<WeatherInfo> duration = weatherService.getWeatherInfos(
+                tripSchedule.lat,
+                tripSchedule.lon,
+                tripSchedule.start,
+                tripSchedule.end
+        );
         Map<Category, List<Clothing>> outfits = clothService.getOutfitWithPeriod(duration);
         return new OutfitResponse(outfits);
     }
