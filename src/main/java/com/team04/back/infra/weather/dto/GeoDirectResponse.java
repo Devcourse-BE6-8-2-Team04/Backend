@@ -21,7 +21,7 @@ public class GeoDirectResponse {
     /** 국가 코드 (예: KR, US) */
     private String country;
 
-    /** (선택적) 주/도 이름 */
+    /** (선택적) 상태 */
     private String state;
 
     /** 지역 이름 목록 (예: 한국어, 일본어 등 현지어) */
