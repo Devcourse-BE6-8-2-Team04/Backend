@@ -22,7 +22,10 @@ public class Comment{
     @Column(length = 2048)
     private String imageUrl;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
+    private String title;
+
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String sentence;
 
     @Column(nullable = false)
@@ -32,10 +35,11 @@ public class Comment{
     @JoinColumn(name = "weather_info_id", nullable = false)
     private WeatherInfo weatherInfo;
 
-    public Comment(String email, String password, String imageUrl, String sentence, String tagString, WeatherInfo weatherInfo) {
+    public Comment(String email, String password, String imageUrl, String title, String sentence, String tagString, WeatherInfo weatherInfo) {
         this.email = email;
         this.password = password;
         this.imageUrl = imageUrl;
+        this.title = title;
         this.sentence = sentence;
         this.tagString = tagString;
         this.weatherInfo = weatherInfo;

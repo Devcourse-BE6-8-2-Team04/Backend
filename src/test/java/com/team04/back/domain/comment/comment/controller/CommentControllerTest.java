@@ -61,6 +61,7 @@ public class CommentControllerTest {
             resultActions
                     .andExpect(jsonPath("$.content[%d].email".formatted(i)).value(comment.getEmail()))
                     .andExpect(jsonPath("$.content[%d].imageUrl".formatted(i)).value(comment.getImageUrl()))
+                    .andExpect(jsonPath("$.content[%d].title".formatted(i)).value(comment.getTitle()))
                     .andExpect(jsonPath("$.content[%d].sentence".formatted(i)).value(comment.getSentence()))
                     .andExpect(jsonPath("$.content[%d].tagString".formatted(i)).value(comment.getTagString()))
                     .andExpect(jsonPath("$.content[%d].weatherInfoDto.location".formatted(i)).value(comment.getWeatherInfo().getLocation()))
@@ -75,12 +76,12 @@ public class CommentControllerTest {
         ResultActions resultActions = mvc
                 .perform(
                         get("/api/v1/comments")
-                                .param("location", "일본 삿포로")
+                                .param("location", "삿포로")
                                 .param("date", "2025-01-01")
                 ).andDo(print());
 
         CommentSearchCriteria criteria = CommentSearchCriteria.builder()
-                .location("일본 삿포로")
+                .location("삿포로")
                 .date(LocalDate.of(2025, 1, 1))
                 .feelsLikeTemperature(null)
                 .month(null)
@@ -100,6 +101,7 @@ public class CommentControllerTest {
                     .andExpect(jsonPath("$.content[%d].id".formatted(i)).value(comment.getId()))
                     .andExpect(jsonPath("$.content[%d].email".formatted(i)).value(comment.getEmail()))
                     .andExpect(jsonPath("$.content[%d].imageUrl".formatted(i)).value(comment.getImageUrl()))
+                    .andExpect(jsonPath("$.content[%d].title".formatted(i)).value(comment.getTitle()))
                     .andExpect(jsonPath("$.content[%d].sentence".formatted(i)).value(comment.getSentence()))
                     .andExpect(jsonPath("$.content[%d].tagString".formatted(i)).value(comment.getTagString()))
                     .andExpect(jsonPath("$.content[%d].weatherInfoDto.location".formatted(i)).value(comment.getWeatherInfo().getLocation()))
@@ -113,12 +115,12 @@ public class CommentControllerTest {
         ResultActions resultActions = mvc
                 .perform(
                         get("/api/v1/comments")
-                                .param("location", "일본 삿포로")
+                                .param("location", "삿포로")
                                 .param("feelsLikeTemperature", "-4.0")
                 ).andDo(print());
 
         CommentSearchCriteria criteria = CommentSearchCriteria.builder()
-                .location("일본 삿포로")
+                .location("삿포로")
                 .date(null)
                 .feelsLikeTemperature(-4.0)
                 .month(null)
@@ -138,6 +140,7 @@ public class CommentControllerTest {
                     .andExpect(jsonPath("$.content[%d].id".formatted(i)).value(comment.getId()))
                     .andExpect(jsonPath("$.content[%d].email".formatted(i)).value(comment.getEmail()))
                     .andExpect(jsonPath("$.content[%d].imageUrl".formatted(i)).value(comment.getImageUrl()))
+                    .andExpect(jsonPath("$.content[%d].title".formatted(i)).value(comment.getTitle()))
                     .andExpect(jsonPath("$.content[%d].sentence".formatted(i)).value(comment.getSentence()))
                     .andExpect(jsonPath("$.content[%d].tagString".formatted(i)).value(comment.getTagString()))
                     .andExpect(jsonPath("$.content[%d].weatherInfoDto.location".formatted(i)).value(comment.getWeatherInfo().getLocation()))
@@ -173,6 +176,7 @@ public class CommentControllerTest {
                 .andExpect(jsonPath("$.id").value(comment.getId()))
                 .andExpect(jsonPath("$.email").value(comment.getEmail()))
                 .andExpect(jsonPath("$.imageUrl").value(comment.getImageUrl()))
+                .andExpect(jsonPath("$.title").value(comment.getTitle()))
                 .andExpect(jsonPath("$.sentence").value(comment.getSentence()))
                 .andExpect(jsonPath("$.tagString").value(comment.getTagString()))
                 .andExpect(jsonPath("$.weatherInfoDto.location").value(comment.getWeatherInfo().getLocation()))
@@ -229,6 +233,7 @@ public class CommentControllerTest {
                     .andExpect(jsonPath("$.content[%d].id".formatted(i)).value(comment.getId()))
                     .andExpect(jsonPath("$.content[%d].email".formatted(i)).value(comment.getEmail()))
                     .andExpect(jsonPath("$.content[%d].imageUrl".formatted(i)).value(comment.getImageUrl()))
+                    .andExpect(jsonPath("$.content[%d].title".formatted(i)).value(comment.getTitle()))
                     .andExpect(jsonPath("$.content[%d].sentence".formatted(i)).value(comment.getSentence()))
                     .andExpect(jsonPath("$.content[%d].tagString".formatted(i)).value(comment.getTagString()))
                     .andExpect(jsonPath("$.content[%d].weatherInfoDto.location".formatted(i)).value(comment.getWeatherInfo().getLocation()))
