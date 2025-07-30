@@ -77,6 +77,12 @@ public class CommentController {
             @NonNull String password
     ) {}
 
+    /**
+     * 커멘트의 비밀번호를 검증합니다.
+     * @param id 커멘트 ID
+     * @param passwordReqBody 비밀번호 요청 바디
+     * @return 비밀번호 검증 결과
+     */
     @PostMapping("/{id}/verify-password")
     @Transactional(readOnly = true)
     @Operation(summary = "커멘트 비밀번호 검증", description = "커멘트의 비밀번호를 검증합니다.")
@@ -98,6 +104,11 @@ public class CommentController {
         );
     }
 
+    /**
+     * 커멘트를 삭제합니다.
+     * @param id 커멘트 ID
+     * @return 커멘트 DTO
+     */
     @DeleteMapping("/{id}")
     @Transactional
     @Operation(summary = "커멘트 삭제", description = "커멘트를 삭제합니다.")
