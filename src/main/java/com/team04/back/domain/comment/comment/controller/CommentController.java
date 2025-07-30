@@ -4,8 +4,10 @@ import com.team04.back.domain.comment.comment.dto.CommentDto;
 import com.team04.back.domain.comment.comment.entity.Comment;
 import com.team04.back.domain.comment.comment.service.CommentService;
 import com.team04.back.domain.comment.commentSearch.commentSearchCriteria.CommentSearchCriteria;
+import com.team04.back.global.rsData.RsData;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -68,5 +70,57 @@ public class CommentController {
     public CommentDto getComment(@PathVariable int id) {
         Comment comment = commentService.findById(id).get();
         return new CommentDto(comment);
+    }
+
+
+    record verifyPasswordReqBody(
+            @NonNull String password
+    ) {}
+
+    /**
+     * 커멘트의 비밀번호를 검증합니다.
+     * @param id 커멘트 ID
+     * @param passwordReqBody 비밀번호 요청 바디
+     * @return 비밀번호 검증 결과
+     */
+    @PostMapping("/{id}/verify-password")
+    @Transactional(readOnly = true)
+    @Operation(summary = "커멘트 비밀번호 검증", description = "커멘트의 비밀번호를 검증합니다.")
+    public RsData<Boolean> verifyPassword(
+            @PathVariable int id,
+            @RequestBody @NonNull verifyPasswordReqBody passwordReqBody
+    ) {
+        Comment comment = commentService.findById(id).get();
+
+        boolean isVerified = commentService.verifyPassword(comment, passwordReqBody.password());
+        if (!isVerified) {
+            return new RsData<>("400-1", "비밀번호가 일치하지 않습니다.", false);
+        }
+
+        return new RsData<>(
+                "200-1",
+                "비밀번호가 일치합니다.",
+                true
+        );
+    }
+
+    /**
+     * 커멘트를 삭제합니다.
+     * @param id 커멘트 ID
+     * @return 커멘트 DTO
+     */
+    @DeleteMapping("/{id}")
+    @Transactional
+    @Operation(summary = "커멘트 삭제", description = "커멘트를 삭제합니다.")
+    public RsData<CommentDto> deleteComment(@PathVariable int id) {
+        Comment comment = commentService.findById(id).get();
+
+        commentService.delete(comment);
+
+        return new RsData<>(
+                "200-1",
+                "%d번 커멘트가 삭제되었습니다.".formatted(id),
+                new CommentDto(comment)
+        );
     }
 }

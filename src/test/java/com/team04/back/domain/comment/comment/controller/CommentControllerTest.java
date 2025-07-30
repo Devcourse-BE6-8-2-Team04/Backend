@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -18,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -240,5 +241,101 @@ public class CommentControllerTest {
                     .andExpect(jsonPath("$.content[%d].weatherInfoDto.date".formatted(i)).value(comment.getWeatherInfo().getDate().toString()))
                     .andExpect(jsonPath("$.content[%d].weatherInfoDto.feelsLikeTemperature".formatted(i)).value(comment.getWeatherInfo().getFeelsLikeTemperature()));
         }
+    }
+
+    @Test
+    @DisplayName("커멘트 비밀번호 검증")
+    public void t7() throws Exception {
+        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
+                .location(null)
+                .date(null)
+                .feelsLikeTemperature(null)
+                .month(null)
+                .build();
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
+
+        int id = comments.getContent().get(0).getId();
+
+        ResultActions resultActions = mvc
+                .perform(
+                        post("/api/v1/comments/" + id + "/verify-password")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                            "password": "1234"
+                                        }
+                                        """)
+                ).andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(CommentController.class))
+                .andExpect(handler().methodName("verifyPassword"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.resultCode").value("200-1"))
+                .andExpect(jsonPath("$.msg").value("비밀번호가 일치합니다."))
+                .andExpect(jsonPath("$.data").value(true));
+    }
+
+    @Test
+    @DisplayName("커멘트 비밀번호 검증 - 잘못된 비밀번호")
+    public void t8() throws Exception {
+        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
+                .location(null)
+                .date(null)
+                .feelsLikeTemperature(null)
+                .month(null)
+                .build();
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
+
+        int id = comments.getContent().get(0).getId();
+
+        ResultActions resultActions = mvc
+                .perform(
+                        post("/api/v1/comments/" + id + "/verify-password")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                            "password": "wrong-password"
+                                        }
+                                        """)
+                ).andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(CommentController.class))
+                .andExpect(handler().methodName("verifyPassword"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.resultCode").value("400-1"))
+                .andExpect(jsonPath("$.msg").value("비밀번호가 일치하지 않습니다."))
+                .andExpect(jsonPath("$.data").value(false));
+    }
+
+    @Test
+    @DisplayName("커멘트 삭제")
+    public void t9() throws Exception {
+        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
+                .location(null)
+                .date(null)
+                .feelsLikeTemperature(null)
+                .month(null)
+                .build();
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
+
+        int id = comments.getContent().get(0).getId();
+
+        ResultActions resultActions = mvc
+                .perform(
+                        delete("/api/v1/comments/" + id )
+                ).andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(CommentController.class))
+                .andExpect(handler().methodName("deleteComment"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.resultCode").value("200-1"))
+                .andExpect(jsonPath("$.msg").value("%d번 커멘트가 삭제되었습니다.".formatted(id)))
+                .andExpect(jsonPath("$.data.id").value(id));
     }
 }
