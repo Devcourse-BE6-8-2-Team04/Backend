@@ -8,6 +8,7 @@ public record CommentDto (
         @NonNull int id,
         @NonNull String email,
         String imageUrl,
+        @NonNull String title,
         @NonNull String sentence,
         @NonNull String tagString,
         @NonNull WeatherInfoDto weatherInfoDto
@@ -17,6 +18,7 @@ public record CommentDto (
                 comment.getId(),
                 comment.getEmail(),
                 comment.getImageUrl(),
+                comment.getTitle(),
                 comment.getSentence(),
                 comment.getTagString(),
                 new WeatherInfoDto(comment.getWeatherInfo())
