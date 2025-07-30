@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 
+
 public record WeatherInfoDto(
         @NotNull int id,
         @NotNull String weather,

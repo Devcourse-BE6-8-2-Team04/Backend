@@ -19,7 +19,4 @@ public class CategoryClothDto {
         this.category = category;
     }
 
-    public static CategoryClothDto from(int id, String clothName, String imageUrl, Category category) {
-        return new CategoryClothDto(clothName, imageUrl, category);
-    }
 }
