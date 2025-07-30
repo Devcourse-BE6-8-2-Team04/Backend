@@ -97,4 +97,19 @@ public class CommentController {
                 true
         );
     }
+
+    @DeleteMapping("/{id}")
+    @Transactional
+    @Operation(summary = "커멘트 삭제", description = "커멘트를 삭제합니다.")
+    public RsData<CommentDto> deleteComment(@PathVariable int id) {
+        Comment comment = commentService.findById(id).get();
+
+        commentService.delete(comment);
+
+        return new RsData<>(
+                "200-1",
+                "%d번 커멘트가 삭제되었습니다.".formatted(id),
+                new CommentDto(comment)
+        );
+    }
 }
