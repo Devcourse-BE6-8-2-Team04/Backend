@@ -49,12 +49,12 @@ public class ClothController {
     }
 
     record TripSchedule(
-            @NotBlank
-            String place,
             @FutureOrPresent
             LocalDate start,
             @Future
-            LocalDate end
+            LocalDate end,
+            double lat,
+            double lon
     ) {
         public TripSchedule {
             if (start != null && end != null && !start.isBefore(end)) {
@@ -65,7 +65,12 @@ public class ClothController {
 
     @GetMapping
     public OutfitResponse getOutfitWithPeriod(TripSchedule tripSchedule) {
-        List<WeatherInfo> duration = weatherService.getDurationWeather(tripSchedule.place, tripSchedule.start, tripSchedule.end);
+        List<WeatherInfo> duration = weatherService.getWeatherInfos(
+                tripSchedule.lat,
+                tripSchedule.lon,
+                tripSchedule.start,
+                tripSchedule.end
+        );
         Map<Category, List<Clothing>> outfits = clothService.getOutfitWithPeriod(duration);
         return new OutfitResponse(outfits);
     }
