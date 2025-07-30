@@ -4,8 +4,10 @@ import com.team04.back.domain.comment.comment.dto.CommentDto;
 import com.team04.back.domain.comment.comment.entity.Comment;
 import com.team04.back.domain.comment.comment.service.CommentService;
 import com.team04.back.domain.comment.commentSearch.commentSearchCriteria.CommentSearchCriteria;
+import com.team04.back.global.rsData.RsData;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -68,5 +70,25 @@ public class CommentController {
     public CommentDto getComment(@PathVariable int id) {
         Comment comment = commentService.findById(id).get();
         return new CommentDto(comment);
+    }
+
+
+    record verifyPasswordReqBody(
+            @NonNull String password
+    ) {}
+
+    @PostMapping("/{id}/verify-password")
+    @Transactional(readOnly = true)
+    @Operation(summary = "커멘트 비밀번호 검증", description = "커멘트의 비밀번호를 검증합니다.")
+    public RsData<Boolean> verifyPassword(
+            @PathVariable int id,
+            @RequestBody @NonNull verifyPasswordReqBody passwordReqBody
+    ) {
+        Comment comment = commentService.findById(id).get();
+        return new RsData<>(
+                "200-1",
+                "비밀번호가 일치합니다.",
+                commentService.verifyPassword(comment, passwordReqBody.password())
+        );
     }
 }

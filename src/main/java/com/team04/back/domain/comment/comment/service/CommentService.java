@@ -34,4 +34,8 @@ public class CommentService {
                 pageable
         );
     }
+
+    public boolean verifyPassword(Comment comment, String password) {
+        return comment.getPassword().equals(password);
+    }
 }
