@@ -48,4 +48,8 @@ public class CommentService {
         Comment comment = new Comment(email, password, imageUrl, title, sentence, tagString, weatherInfo);
         return commentRepository.save(comment);
     }
+
+    public Optional<Comment> findLatest() {
+        return commentRepository.findFirstByOrderByIdDesc();
+    }
 }

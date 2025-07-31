@@ -3,11 +3,20 @@ package com.team04.back.domain.comment.comment.controller;
 import com.team04.back.domain.comment.comment.entity.Comment;
 import com.team04.back.domain.comment.comment.service.CommentService;
 import com.team04.back.domain.comment.commentSearch.commentSearchCriteria.CommentSearchCriteria;
+import com.team04.back.domain.weather.weather.entity.WeatherInfo;
+import com.team04.back.domain.weather.weather.enums.Weather;
+import com.team04.back.domain.weather.weather.repository.WeatherRepository;
+import com.team04.back.domain.weather.weather.service.WeatherService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,7 +27,10 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 
+import static org.mockito.ArgumentMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -27,6 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
+@Import(CommentControllerTest.TestConfig.class)
 public class CommentControllerTest {
     @Autowired
     private MockMvc mvc;
@@ -305,7 +318,7 @@ public class CommentControllerTest {
         resultActions
                 .andExpect(handler().handlerType(CommentController.class))
                 .andExpect(handler().methodName("verifyPassword"))
-                .andExpect(status().isOk())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.resultCode").value("400-1"))
                 .andExpect(jsonPath("$.msg").value("비밀번호가 일치하지 않습니다."))
                 .andExpect(jsonPath("$.data").value(false));
@@ -337,5 +350,83 @@ public class CommentControllerTest {
                 .andExpect(jsonPath("$.resultCode").value("200-1"))
                 .andExpect(jsonPath("$.msg").value("%d번 커멘트가 삭제되었습니다.".formatted(id)))
                 .andExpect(jsonPath("$.data.id").value(id));
+    }
+
+
+    @Autowired
+    private WeatherService weatherService;
+    @Autowired
+    private WeatherRepository weatherRepository;
+
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        public WeatherService weatherService() {
+            return Mockito.mock(WeatherService.class);
+        }
+    }
+
+    @BeforeEach
+    void setUp() {
+        WeatherInfo mockWeatherInfo = WeatherInfo.builder()
+                .location("Seoul")
+                .date(LocalDate.of(2025, 1, 1))
+                .weather(Weather.CLEAR_SKY)
+                .minTemperature(15.0)
+                .maxTemperature(25.0)
+                .dailyTemperatureGap(10.0)
+                .feelsLikeTemperature(20.0)
+                .createDate(LocalDateTime.now())
+                .modifyDate(LocalDateTime.now())
+                .build();
+
+        WeatherInfo saved = weatherRepository.save(mockWeatherInfo);
+
+        Mockito.when(weatherService.getCoordinatesFromLocation(eq("Seoul"), eq("KR")))
+                .thenReturn(List.of(37.5665, 126.9780));
+
+        Mockito.when(weatherService.getWeatherInfo(eq("Seoul"), anyDouble(), anyDouble(), any(LocalDate.class)))
+                .thenReturn(saved);
+    }
+
+    @Test
+    @DisplayName("커멘트 작성")
+    public void t10() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        post("/api/v1/comments")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                            "email": "user@test.com",
+                                            "password": "1234",
+                                            "title": "Test Comment",
+                                            "sentence": "This is a test comment.",
+                                            "imageUrl": "http://example.com/image.jpg",
+                                            "tagString": "#test#comment",
+                                            "countryCode": "KR",
+                                            "cityName": "Seoul",
+                                            "date": "2025-01-01"
+                                        }
+                                        """)
+                ).andDo(print());
+
+        Comment comment = commentService.findLatest().get();
+
+        resultActions
+                .andExpect(handler().handlerType(CommentController.class))
+                .andExpect(handler().methodName("createComment"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.resultCode").value("201-1"))
+                .andExpect(jsonPath("$.msg").value("%d번 커멘트가 작성되었습니다.".formatted(comment.getId())))
+                .andExpect(jsonPath("$.data.id").value(comment.getId()))
+                .andExpect(jsonPath("$.data.email").value(comment.getEmail()))
+                .andExpect(jsonPath("$.data.imageUrl").value(comment.getImageUrl()))
+                .andExpect(jsonPath("$.data.title").value(comment.getTitle()))
+                .andExpect(jsonPath("$.data.sentence").value(comment.getSentence()))
+                .andExpect(jsonPath("$.data.tagString").value(comment.getTagString()))
+                .andExpect(jsonPath("$.data.weatherInfoDto.location").value(comment.getWeatherInfo().getLocation()))
+                .andExpect(jsonPath("$.data.weatherInfoDto.date").value(comment.getWeatherInfo().getDate().toString()))
+                .andExpect(jsonPath("$.data.weatherInfoDto.feelsLikeTemperature").value(comment.getWeatherInfo().getFeelsLikeTemperature()));
     }
 }

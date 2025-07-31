@@ -136,9 +136,8 @@ public class CommentController {
             @NonNull String sentence,
             @NonNull String tagString,
             String imageUrl,
-            @NonNull String country,
-            @NonNull String cityName,
             @NonNull String countryCode,
+            @NonNull String cityName,
             @NonNull @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
     ) {}
 

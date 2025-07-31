@@ -31,7 +31,7 @@ public class Comment{
     @Column(nullable = false)
     private String tagString;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "weather_info_id", nullable = false)
     private WeatherInfo weatherInfo;
 
