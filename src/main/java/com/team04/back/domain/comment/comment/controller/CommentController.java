@@ -156,7 +156,12 @@ public class CommentController {
                 createCommentReqBody.cityName,
                 createCommentReqBody.countryCode
         );
-        WeatherInfo weatherInfo = weatherService.getWeatherInfo(createCommentReqBody.cityName, coordinates.get(0), coordinates.get(1), createCommentReqBody.date);
+        WeatherInfo weatherInfo = weatherService.getWeatherInfo(
+                createCommentReqBody.cityName,
+                coordinates.get(0),
+                coordinates.get(1),
+                createCommentReqBody.date
+        );
 
         Comment comment = commentService.createComment(
                 createCommentReqBody.email(),
@@ -171,6 +176,59 @@ public class CommentController {
         return new RsData<>(
                 "201-1",
                 "%d번 커멘트가 작성되었습니다.".formatted(comment.getId()),
+                new CommentDto(comment)
+        );
+    }
+
+
+    record ModifyCommentReqBody(
+            @NonNull String title,
+            @NonNull String sentence,
+            @NonNull String tagString,
+            String imageUrl,
+            @NonNull String countryCode,
+            @NonNull String cityName,
+            @NonNull @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    ) {}
+
+    /**
+     * 커멘트를 수정합니다.
+     * @param id 커멘트 ID
+     * @param modifyCommentReqBody 커멘트 수정 요청 바디
+     * @return 수정된 커멘트 DTO
+     */
+    @PutMapping("/{id}")
+    @Transactional
+    @Operation(summary = "커멘트 수정", description = "커멘트를 수정합니다.")
+    public RsData<CommentDto> modifyComment(
+            @PathVariable int id,
+            @RequestBody @NonNull ModifyCommentReqBody modifyCommentReqBody
+    ) {
+        Comment comment = commentService.findById(id).get();
+
+        List<Double> coordinates = weatherService.getCoordinatesFromLocation(
+                modifyCommentReqBody.cityName(),
+                modifyCommentReqBody.countryCode()
+        );
+        WeatherInfo weatherInfo = weatherService.getWeatherInfo(
+                modifyCommentReqBody.cityName(),
+                coordinates.get(0),
+                coordinates.get(1),
+                modifyCommentReqBody.date()
+        );
+
+        comment = commentService.modify(
+                comment,
+                modifyCommentReqBody.title(),
+                modifyCommentReqBody.sentence(),
+                modifyCommentReqBody.tagString(),
+                modifyCommentReqBody.imageUrl(),
+                weatherInfo
+        );
+
+        return new RsData<>(
+                "200-1",
+                "%d번 커멘트가 수정되었습니다.".formatted(comment.getId()),
                 new CommentDto(comment)
         );
     }

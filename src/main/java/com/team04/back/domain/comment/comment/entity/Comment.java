@@ -44,4 +44,14 @@ public class Comment{
         this.tagString = tagString;
         this.weatherInfo = weatherInfo;
     }
+
+    public Comment modify(String title, String sentence, String tagString, String imageUrl, WeatherInfo weatherInfo) {
+        this.title = title;
+        this.sentence = sentence;
+        this.tagString = tagString;
+        this.imageUrl = imageUrl;
+        this.weatherInfo = weatherInfo;
+
+        return this;
+    }
 }

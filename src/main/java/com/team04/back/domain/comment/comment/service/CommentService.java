@@ -52,4 +52,8 @@ public class CommentService {
     public Optional<Comment> findLatest() {
         return commentRepository.findFirstByOrderByIdDesc();
     }
+
+    public Comment modify(Comment comment, String title, String sentence, String tagString, String imageUrl, WeatherInfo weatherInfo) {
+        return comment.modify(title, sentence, tagString, imageUrl, weatherInfo);
+    }
 }
