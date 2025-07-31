@@ -33,7 +33,7 @@ class GeoControllerTest {
 
         // then
         result.andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].name").value("Seoul"))
                 .andExpect(jsonPath("$[0].lat").exists())
                 .andExpect(jsonPath("$[0].lon").exists())
