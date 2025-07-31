@@ -146,13 +146,13 @@ public class CommentController {
     ) {}
 
     /**
-     * 커멘트를 저장합니다.
+     * 커멘트를 작성합니다.
      * @param createCommentReqBody 커멘트 생성 요청 바디
      * @return 저장된 커멘트 DTO
      */
     @PostMapping
     @Transactional
-    @Operation(summary = "커멘트 저장", description = "새로운 커멘트를 저장합니다.")
+    @Operation(summary = "커멘트 작성", description = "새로운 커멘트를 작성합니다.")
     public RsData<CommentDto> createComment(
             @RequestBody @Valid CreateCommentReqBody createCommentReqBody
     ) {
