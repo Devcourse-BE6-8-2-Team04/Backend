@@ -4,6 +4,8 @@ import com.team04.back.domain.comment.comment.dto.CommentDto;
 import com.team04.back.domain.comment.comment.entity.Comment;
 import com.team04.back.domain.comment.comment.service.CommentService;
 import com.team04.back.domain.comment.commentSearch.commentSearchCriteria.CommentSearchCriteria;
+import com.team04.back.domain.weather.weather.entity.WeatherInfo;
+import com.team04.back.domain.weather.weather.service.WeatherService;
 import com.team04.back.global.rsData.RsData;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/comments")
@@ -25,6 +28,7 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class CommentController {
     private final CommentService commentService;
+    private final WeatherService weatherService;
 
     /**
      * 이 API는 location, date, feelsLikeTemperature, month 파라미터를 사용하여 필터링된 커멘트 목록을 조회합니다.
@@ -120,6 +124,54 @@ public class CommentController {
         return new RsData<>(
                 "200-1",
                 "%d번 커멘트가 삭제되었습니다.".formatted(id),
+                new CommentDto(comment)
+        );
+    }
+
+
+    record CreateCommentReqBody(
+            @NonNull String email,
+            @NonNull String password,
+            @NonNull String title,
+            @NonNull String sentence,
+            @NonNull String tagString,
+            String imageUrl,
+            @NonNull String country,
+            @NonNull String cityName,
+            @NonNull String countryCode,
+            @NonNull @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    ) {}
+
+    /**
+     * 커멘트를 저장합니다.
+     * @param createCommentReqBody 커멘트 생성 요청 바디
+     * @return 저장된 커멘트 DTO
+     */
+    @PostMapping
+    @Transactional
+    @Operation(summary = "커멘트 저장", description = "새로운 커멘트를 저장합니다.")
+    public RsData<CommentDto> createComment(
+            @RequestBody @NonNull CreateCommentReqBody createCommentReqBody
+    ) {
+        List<Double> coordinates = weatherService.getCoordinatesFromLocation(
+                createCommentReqBody.cityName,
+                createCommentReqBody.countryCode
+        );
+        WeatherInfo weatherInfo = weatherService.getWeatherInfo(createCommentReqBody.cityName, coordinates.get(0), coordinates.get(1), createCommentReqBody.date);
+
+        Comment comment = commentService.createComment(
+                createCommentReqBody.email(),
+                createCommentReqBody.password(),
+                createCommentReqBody.imageUrl(),
+                createCommentReqBody.title(),
+                createCommentReqBody.sentence(),
+                createCommentReqBody.tagString(),
+                weatherInfo
+        );
+
+        return new RsData<>(
+                "201-1",
+                "%d번 커멘트가 작성되었습니다.".formatted(comment.getId()),
                 new CommentDto(comment)
         );
     }

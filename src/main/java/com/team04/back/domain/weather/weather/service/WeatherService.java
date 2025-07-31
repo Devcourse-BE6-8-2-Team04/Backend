@@ -116,6 +116,15 @@ public class WeatherService {
                 .orElse("알 수 없음");
     }
 
+    // 지역 이름을 이용하여 좌표 조회
+    public List<Double> getCoordinatesFromLocation(String cityName, String countryCode) {
+        return weatherApiClient.fetchCoordinatesByCity(cityName, countryCode, 1)
+                .blockOptional()
+                .flatMap(list -> list.stream().findFirst())
+                .map(geo -> List.of(geo.getLat(), geo.getLon()))
+                .orElse(List.of(0.0, 0.0)); // 기본값으로 0.0, 0.0 반환
+    }
+
     // 유효성 검사: 마지막 업데이트가 3시간 이내인지 확인
     private boolean isValid(WeatherInfo weatherInfo) {
         LocalDateTime lastUpdated = weatherInfo.getModifyDate();

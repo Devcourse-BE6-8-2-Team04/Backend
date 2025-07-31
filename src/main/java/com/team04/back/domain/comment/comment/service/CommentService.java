@@ -4,6 +4,7 @@ import com.team04.back.domain.comment.comment.entity.Comment;
 import com.team04.back.domain.comment.comment.repository.CommentRepository;
 import com.team04.back.domain.comment.commentSearch.commentSearchCriteria.CommentSearchCriteria;
 import com.team04.back.domain.comment.commentSearch.commentSpecification.CommentSpecification;
+import com.team04.back.domain.weather.weather.entity.WeatherInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -41,5 +42,10 @@ public class CommentService {
 
     public void delete(Comment comment) {
         commentRepository.delete(comment);
+    }
+
+    public Comment createComment(String email, String password, String imageUrl, String title, String sentence, String tagString, WeatherInfo weatherInfo) {
+        Comment comment = new Comment(email, password, imageUrl, title, sentence, tagString, weatherInfo);
+        return commentRepository.save(comment);
     }
 }
