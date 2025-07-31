@@ -9,6 +9,10 @@ import com.team04.back.domain.weather.weather.service.WeatherService;
 import com.team04.back.global.rsData.RsData;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -130,14 +134,14 @@ public class CommentController {
 
 
     record CreateCommentReqBody(
-            @NonNull String email,
-            @NonNull String password,
-            @NonNull String title,
-            @NonNull String sentence,
-            @NonNull String tagString,
+            @NotBlank @Email String email,
+            @NotBlank @Size(min = 4) String password,
+            @NotBlank @Size(min = 2, max = 100) String title,
+            @NotBlank @Size(min = 2, max = 500) String sentence,
+            @NotBlank String tagString,
             String imageUrl,
-            @NonNull String countryCode,
-            @NonNull String cityName,
+            @NotBlank String countryCode,
+            @NotBlank String cityName,
             @NonNull @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
     ) {}
 
@@ -150,7 +154,7 @@ public class CommentController {
     @Transactional
     @Operation(summary = "커멘트 저장", description = "새로운 커멘트를 저장합니다.")
     public RsData<CommentDto> createComment(
-            @RequestBody @NonNull CreateCommentReqBody createCommentReqBody
+            @RequestBody @Valid CreateCommentReqBody createCommentReqBody
     ) {
         List<Double> coordinates = weatherService.getCoordinatesFromLocation(
                 createCommentReqBody.cityName,
@@ -182,12 +186,12 @@ public class CommentController {
 
 
     record ModifyCommentReqBody(
-            @NonNull String title,
-            @NonNull String sentence,
-            @NonNull String tagString,
+            @NotBlank @Size(min = 2, max = 100) String title,
+            @NotBlank @Size(min = 2, max = 500) String sentence,
+            @NotBlank String tagString,
             String imageUrl,
-            @NonNull String countryCode,
-            @NonNull String cityName,
+            @NotBlank String countryCode,
+            @NotBlank String cityName,
             @NonNull @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
     ) {}
 
@@ -202,7 +206,7 @@ public class CommentController {
     @Operation(summary = "커멘트 수정", description = "커멘트를 수정합니다.")
     public RsData<CommentDto> modifyComment(
             @PathVariable int id,
-            @RequestBody @NonNull ModifyCommentReqBody modifyCommentReqBody
+            @RequestBody @Valid ModifyCommentReqBody modifyCommentReqBody
     ) {
         Comment comment = commentService.findById(id).get();
 
