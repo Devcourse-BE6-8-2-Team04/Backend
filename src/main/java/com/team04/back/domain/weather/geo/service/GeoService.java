@@ -21,7 +21,7 @@ public class GeoService {
      * @return 도시에 대한 지역 정보 리스트
      */
     public List<GeoLocationDto> getGeoLocations(String location) {
-        return weatherApiClient.fetchCoordinatesByCity(location, null, null)
+        return weatherApiClient.fetchCoordinatesByCity(location, null, 5)
                 .blockOptional()
                 .map(response -> response.stream()
                         .map(GeoLocationDto::new)
