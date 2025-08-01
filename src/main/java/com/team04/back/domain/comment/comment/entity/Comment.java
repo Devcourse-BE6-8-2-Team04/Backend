@@ -31,7 +31,7 @@ public class Comment{
     @Column(nullable = false)
     private String tagString;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "weather_info_id", nullable = false)
     private WeatherInfo weatherInfo;
 
@@ -43,5 +43,15 @@ public class Comment{
         this.sentence = sentence;
         this.tagString = tagString;
         this.weatherInfo = weatherInfo;
+    }
+
+    public Comment modify(String title, String sentence, String tagString, String imageUrl, WeatherInfo weatherInfo) {
+        this.title = title;
+        this.sentence = sentence;
+        this.tagString = tagString;
+        this.imageUrl = imageUrl;
+        this.weatherInfo = weatherInfo;
+
+        return this;
     }
 }
