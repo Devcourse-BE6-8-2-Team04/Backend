@@ -29,7 +29,7 @@ public class CommentService {
         return commentRepository.findById(id);
     }
 
-    public Page<Comment> findByCriteria(CommentSearchDto search, Pageable pageable) {
+    public Page<Comment> findBySearch(CommentSearchDto search, Pageable pageable) {
         return commentRepository.findAll(
                 CommentSpecification.withCriteria(search),
                 pageable

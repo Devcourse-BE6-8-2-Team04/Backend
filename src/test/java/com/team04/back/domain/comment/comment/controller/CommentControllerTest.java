@@ -57,7 +57,7 @@ public class CommentControllerTest {
 
         CommentSearchDto search = new CommentSearchDto(null, null, null, null, null);
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByCriteria(search, pageable);
+        Page<Comment> comments = commentService.findBySearch(search, pageable);
         int size = comments.getContent().size();
 
         resultActions
@@ -92,7 +92,7 @@ public class CommentControllerTest {
 
         CommentSearchDto search = new CommentSearchDto("삿포로", LocalDate.of(2025, 1, 1), null, null, null);
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByCriteria(search, pageable);
+        Page<Comment> comments = commentService.findBySearch(search, pageable);
         int size = comments.getContent().size();
 
         resultActions
@@ -126,7 +126,7 @@ public class CommentControllerTest {
 
         CommentSearchDto search = new CommentSearchDto("삿포로", null, -4.0, null, null);
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByCriteria(search, pageable);
+        Page<Comment> comments = commentService.findBySearch(search, pageable);
         int size = comments.getContent().size();
 
         resultActions
@@ -153,7 +153,7 @@ public class CommentControllerTest {
     public void t4() throws Exception {
         CommentSearchDto search = new CommentSearchDto(null, null, null, null, null);
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByCriteria(search, pageable);
+        Page<Comment> comments = commentService.findBySearch(search, pageable);
 
         int id = comments.getContent().get(0).getId();
 
@@ -208,7 +208,7 @@ public class CommentControllerTest {
 
         CommentSearchDto search = new CommentSearchDto(null, null, null, 1, null);
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByCriteria(search, pageable);
+        Page<Comment> comments = commentService.findBySearch(search, pageable);
         int size = comments.getContent().size();
 
         resultActions
@@ -237,7 +237,7 @@ public class CommentControllerTest {
     public void t7() throws Exception {
         CommentSearchDto search = new CommentSearchDto(null, null, null, null, null);
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByCriteria(search, pageable);
+        Page<Comment> comments = commentService.findBySearch(search, pageable);
 
         int id = comments.getContent().get(0).getId();
 
@@ -266,7 +266,7 @@ public class CommentControllerTest {
     public void t8() throws Exception {
         CommentSearchDto search = new CommentSearchDto(null, null, null, null, null);
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByCriteria(search, pageable);
+        Page<Comment> comments = commentService.findBySearch(search, pageable);
 
         int id = comments.getContent().get(0).getId();
 
@@ -295,7 +295,7 @@ public class CommentControllerTest {
     public void t9() throws Exception {
         CommentSearchDto search = new CommentSearchDto(null, null, null, null, null);
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByCriteria(search, pageable);
+        Page<Comment> comments = commentService.findBySearch(search, pageable);
 
         int id = comments.getContent().get(0).getId();
 
@@ -402,7 +402,7 @@ public class CommentControllerTest {
     public void t11() throws Exception {
         CommentSearchDto search = new CommentSearchDto(null, null, null, null, null);
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByCriteria(search, pageable);
+        Page<Comment> comments = commentService.findBySearch(search, pageable);
 
         int id = comments.getContent().get(0).getId();
 

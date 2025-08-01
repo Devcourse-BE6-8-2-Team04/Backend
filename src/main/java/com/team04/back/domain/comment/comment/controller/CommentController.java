@@ -67,7 +67,7 @@ public class CommentController {
                 email
         );
 
-        Page<Comment> items = commentService.findByCriteria(search, pageable);
+        Page<Comment> items = commentService.findBySearch(search, pageable);
         return items.map(CommentDto::new);
     }
 
