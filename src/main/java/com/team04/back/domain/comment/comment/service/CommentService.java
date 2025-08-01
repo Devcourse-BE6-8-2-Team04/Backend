@@ -2,7 +2,7 @@ package com.team04.back.domain.comment.comment.service;
 
 import com.team04.back.domain.comment.comment.entity.Comment;
 import com.team04.back.domain.comment.comment.repository.CommentRepository;
-import com.team04.back.domain.comment.commentSearch.commentSearchCriteria.CommentSearchCriteria;
+import com.team04.back.domain.comment.comment.dto.CommentSearchDto;
 import com.team04.back.domain.comment.commentSearch.commentSpecification.CommentSpecification;
 import com.team04.back.domain.weather.weather.entity.WeatherInfo;
 import lombok.RequiredArgsConstructor;
@@ -29,9 +29,9 @@ public class CommentService {
         return commentRepository.findById(id);
     }
 
-    public Page<Comment> findByCriteria(CommentSearchCriteria criteria, Pageable pageable) {
+    public Page<Comment> findByCriteria(CommentSearchDto search, Pageable pageable) {
         return commentRepository.findAll(
-                CommentSpecification.withCriteria(criteria),
+                CommentSpecification.withCriteria(search),
                 pageable
         );
     }

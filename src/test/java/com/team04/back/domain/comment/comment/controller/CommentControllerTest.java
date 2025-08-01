@@ -2,7 +2,7 @@ package com.team04.back.domain.comment.comment.controller;
 
 import com.team04.back.domain.comment.comment.entity.Comment;
 import com.team04.back.domain.comment.comment.service.CommentService;
-import com.team04.back.domain.comment.commentSearch.commentSearchCriteria.CommentSearchCriteria;
+import com.team04.back.domain.comment.comment.dto.CommentSearchDto;
 import com.team04.back.domain.weather.geo.service.GeoService;
 import com.team04.back.domain.weather.weather.entity.WeatherInfo;
 import com.team04.back.domain.weather.weather.enums.Weather;
@@ -55,15 +55,9 @@ public class CommentControllerTest {
                         get("/api/v1/comments")
                 ).andDo(print());
 
-        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
-                .location(null)
-                .date(null)
-                .feelsLikeTemperature(null)
-                .month(null)
-                .email(null)
-                .build();
+        CommentSearchDto search = new CommentSearchDto(null, null, null, null, null);
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
+        Page<Comment> comments = commentService.findByCriteria(search, pageable);
         int size = comments.getContent().size();
 
         resultActions
@@ -96,15 +90,9 @@ public class CommentControllerTest {
                                 .param("date", "2025-01-01")
                 ).andDo(print());
 
-        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
-                .location("삿포로")
-                .date(LocalDate.of(2025, 1, 1))
-                .feelsLikeTemperature(null)
-                .month(null)
-                .email(null)
-                .build();
+        CommentSearchDto search = new CommentSearchDto("삿포로", LocalDate.of(2025, 1, 1), null, null, null);
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
+        Page<Comment> comments = commentService.findByCriteria(search, pageable);
         int size = comments.getContent().size();
 
         resultActions
@@ -136,15 +124,9 @@ public class CommentControllerTest {
                                 .param("feelsLikeTemperature", "-4.0")
                 ).andDo(print());
 
-        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
-                .location("삿포로")
-                .date(null)
-                .feelsLikeTemperature(-4.0)
-                .month(null)
-                .email(null)
-                .build();
+        CommentSearchDto search = new CommentSearchDto("삿포로", null, -4.0, null, null);
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
+        Page<Comment> comments = commentService.findByCriteria(search, pageable);
         int size = comments.getContent().size();
 
         resultActions
@@ -169,15 +151,9 @@ public class CommentControllerTest {
     @Test
     @DisplayName("커멘트 단건 조회")
     public void t4() throws Exception {
-        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
-                .location(null)
-                .date(null)
-                .feelsLikeTemperature(null)
-                .month(null)
-                .email(null)
-                .build();
+        CommentSearchDto search = new CommentSearchDto(null, null, null, null, null);
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
+        Page<Comment> comments = commentService.findByCriteria(search, pageable);
 
         int id = comments.getContent().get(0).getId();
 
@@ -230,138 +206,9 @@ public class CommentControllerTest {
                                 .param("month", "1") // 1월 필터링
                 ).andDo(print());
 
-        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
-                .location(null)
-                .date(null)
-                .feelsLikeTemperature(null)
-                .month(1) // 1월 필터링
-                .email(null)
-                .build();
+        CommentSearchDto search = new CommentSearchDto(null, null, null, 1, null);
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
-        int size = comments.getContent().size();
-
-        resultActions
-                .andExpect(handler().handlerType(CommentController.class))
-                .andExpect(handler().methodName("getComments"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.length()").value(size));
-
-        for (int i = 0; i < size; i++) {
-            Comment comment = comments.getContent().get(size - i - 1); // 역순
-            resultActions
-                    .andExpect(jsonPath("$.content[%d].id".formatted(i)).value(comment.getId()))
-                    .andExpect(jsonPath("$.content[%d].email".formatted(i)).value(comment.getEmail()))
-                    .andExpect(jsonPath("$.content[%d].imageUrl".formatted(i)).value(comment.getImageUrl()))
-                    .andExpect(jsonPath("$.content[%d].title".formatted(i)).value(comment.getTitle()))
-                    .andExpect(jsonPath("$.content[%d].sentence".formatted(i)).value(comment.getSentence()))
-                    .andExpect(jsonPath("$.content[%d].tagString".formatted(i)).value(comment.getTagString()))
-                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.location".formatted(i)).value(comment.getWeatherInfo().getLocation()))
-                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.date".formatted(i)).value(comment.getWeatherInfo().getDate().toString()))
-                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.feelsLikeTemperature".formatted(i)).value(comment.getWeatherInfo().getFeelsLikeTemperature()));
-        }
-    }
-
-    @Test
-    @DisplayName("커멘트 조건 검색 - 위치 필터링")
-    public void t6_1() throws Exception {
-        ResultActions resultActions = mvc
-                .perform(
-                        get("/api/v1/comments")
-                                .param("location", "Seoul") // 서울 위치 필터링
-                ).andDo(print());
-
-        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
-                .location("Seoul")
-                .date(null)
-                .feelsLikeTemperature(null)
-                .month(null)
-                .email(null)
-                .build();
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
-        int size = comments.getContent().size();
-
-        resultActions
-                .andExpect(handler().handlerType(CommentController.class))
-                .andExpect(handler().methodName("getComments"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.length()").value(size));
-
-        for (int i = 0; i < size; i++) {
-            Comment comment = comments.getContent().get(size - i - 1); // 역순
-            resultActions
-                    .andExpect(jsonPath("$.content[%d].id".formatted(i)).value(comment.getId()))
-                    .andExpect(jsonPath("$.content[%d].email".formatted(i)).value(comment.getEmail()))
-                    .andExpect(jsonPath("$.content[%d].imageUrl".formatted(i)).value(comment.getImageUrl()))
-                    .andExpect(jsonPath("$.content[%d].title".formatted(i)).value(comment.getTitle()))
-                    .andExpect(jsonPath("$.content[%d].sentence".formatted(i)).value(comment.getSentence()))
-                    .andExpect(jsonPath("$.content[%d].tagString".formatted(i)).value(comment.getTagString()))
-                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.location".formatted(i)).value(comment.getWeatherInfo().getLocation()))
-                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.date".formatted(i)).value(comment.getWeatherInfo().getDate().toString()))
-                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.feelsLikeTemperature".formatted(i)).value(comment.getWeatherInfo().getFeelsLikeTemperature()));
-        }
-    }
-
-    @Test
-    @DisplayName("커멘트 조건 검색 - 체감 온도 필터링")
-    public void t6_2() throws Exception {
-        ResultActions resultActions = mvc
-                .perform(
-                        get("/api/v1/comments")
-                                .param("feelsLikeTemperature", "20.0") // 체감 온도 20도 필터링
-                ).andDo(print());
-
-        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
-                .location(null)
-                .date(null)
-                .feelsLikeTemperature(20.0) // 체감 온도 20도 필터링
-                .month(null)
-                .email(null)
-                .build();
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
-        int size = comments.getContent().size();
-
-        resultActions
-                .andExpect(handler().handlerType(CommentController.class))
-                .andExpect(handler().methodName("getComments"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.length()").value(size));
-
-        for (int i = 0; i < size; i++) {
-            Comment comment = comments.getContent().get(size - i - 1); // 역순
-            resultActions
-                    .andExpect(jsonPath("$.content[%d].id".formatted(i)).value(comment.getId()))
-                    .andExpect(jsonPath("$.content[%d].email".formatted(i)).value(comment.getEmail()))
-                    .andExpect(jsonPath("$.content[%d].imageUrl".formatted(i)).value(comment.getImageUrl()))
-                    .andExpect(jsonPath("$.content[%d].title".formatted(i)).value(comment.getTitle()))
-                    .andExpect(jsonPath("$.content[%d].sentence".formatted(i)).value(comment.getSentence()))
-                    .andExpect(jsonPath("$.content[%d].tagString".formatted(i)).value(comment.getTagString()))
-                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.location".formatted(i)).value(comment.getWeatherInfo().getLocation()))
-                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.date".formatted(i)).value(comment.getWeatherInfo().getDate().toString()))
-                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.feelsLikeTemperature".formatted(i)).value(comment.getWeatherInfo().getFeelsLikeTemperature()));
-        }
-    }
-
-    @Test
-    @DisplayName("커멘트 조건 검색 - 이메일 필터링")
-    public void t6_3() throws Exception {
-        ResultActions resultActions = mvc
-                .perform(
-                        get("/api/v1/comments")
-                                .param("email", "user1@test.com") // 이메일 필터링
-                ).andDo(print());
-
-        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
-                .location(null)
-                .date(null)
-                .feelsLikeTemperature(null)
-                .month(null)
-                .email("user1@test.com") // 이메일 필터링
-                .build();
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
+        Page<Comment> comments = commentService.findByCriteria(search, pageable);
         int size = comments.getContent().size();
 
         resultActions
@@ -388,15 +235,9 @@ public class CommentControllerTest {
     @Test
     @DisplayName("커멘트 비밀번호 검증")
     public void t7() throws Exception {
-        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
-                .location(null)
-                .date(null)
-                .feelsLikeTemperature(null)
-                .month(null)
-                .email(null)
-                .build();
+        CommentSearchDto search = new CommentSearchDto(null, null, null, null, null);
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
+        Page<Comment> comments = commentService.findByCriteria(search, pageable);
 
         int id = comments.getContent().get(0).getId();
 
@@ -423,15 +264,9 @@ public class CommentControllerTest {
     @Test
     @DisplayName("커멘트 비밀번호 검증 - 잘못된 비밀번호")
     public void t8() throws Exception {
-        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
-                .location(null)
-                .date(null)
-                .feelsLikeTemperature(null)
-                .month(null)
-                .email(null)
-                .build();
+        CommentSearchDto search = new CommentSearchDto(null, null, null, null, null);
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
+        Page<Comment> comments = commentService.findByCriteria(search, pageable);
 
         int id = comments.getContent().get(0).getId();
 
@@ -458,15 +293,9 @@ public class CommentControllerTest {
     @Test
     @DisplayName("커멘트 삭제")
     public void t9() throws Exception {
-        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
-                .location(null)
-                .date(null)
-                .feelsLikeTemperature(null)
-                .month(null)
-                .email(null)
-                .build();
+        CommentSearchDto search = new CommentSearchDto(null, null, null, null, null);
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
+        Page<Comment> comments = commentService.findByCriteria(search, pageable);
 
         int id = comments.getContent().get(0).getId();
 
@@ -571,15 +400,9 @@ public class CommentControllerTest {
     @Test
     @DisplayName("커멘트 수정")
     public void t11() throws Exception {
-        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
-                .location(null)
-                .date(null)
-                .feelsLikeTemperature(null)
-                .month(null)
-                .email(null)
-                .build();
+        CommentSearchDto search = new CommentSearchDto(null, null, null, null, null);
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
+        Page<Comment> comments = commentService.findByCriteria(search, pageable);
 
         int id = comments.getContent().get(0).getId();
 

@@ -3,7 +3,7 @@ package com.team04.back.domain.comment.comment.controller;
 import com.team04.back.domain.comment.comment.dto.CommentDto;
 import com.team04.back.domain.comment.comment.entity.Comment;
 import com.team04.back.domain.comment.comment.service.CommentService;
-import com.team04.back.domain.comment.commentSearch.commentSearchCriteria.CommentSearchCriteria;
+import com.team04.back.domain.comment.comment.dto.CommentSearchDto;
 import com.team04.back.domain.weather.geo.service.GeoService;
 import com.team04.back.domain.weather.weather.entity.WeatherInfo;
 import com.team04.back.domain.weather.weather.service.WeatherService;
@@ -59,15 +59,15 @@ public class CommentController {
             @RequestParam(required = false) String email,
             @PageableDefault(size = 10, page = 0, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
-                .location(location)
-                .date(date)
-                .feelsLikeTemperature(feelsLikeTemperature)
-                .month(month)
-                .email(email)
-                .build();
+        CommentSearchDto search = new CommentSearchDto(
+                location,
+                date,
+                feelsLikeTemperature,
+                month,
+                email
+        );
 
-        Page<Comment> items = commentService.findByCriteria(criteria, pageable);
+        Page<Comment> items = commentService.findByCriteria(search, pageable);
         return items.map(CommentDto::new);
     }
 

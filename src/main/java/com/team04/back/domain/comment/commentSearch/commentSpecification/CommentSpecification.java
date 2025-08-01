@@ -1,19 +1,19 @@
 package com.team04.back.domain.comment.commentSearch.commentSpecification;
 
 import com.team04.back.domain.comment.comment.entity.Comment;
-import com.team04.back.domain.comment.commentSearch.commentSearchCriteria.CommentSearchCriteria;
+import com.team04.back.domain.comment.comment.dto.CommentSearchDto;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDate;
 
 public class CommentSpecification {
 
-    public static Specification<Comment> withCriteria(CommentSearchCriteria criteria) {
-        return hasLocation(criteria.getLocation())            // 첫 번째 조건부터 시작
-                .and(hasDate(criteria.getDate()))             // AND 로 연결
-                .and(hasTemperature(criteria.getFeelsLikeTemperature()))  // AND 로 연결
-                .and(hasMonth(criteria.getMonth()))           // AND 로 연결
-                .and(hasEmail(criteria.getEmail()));          // AND 로 연결
+    public static Specification<Comment> withCriteria(CommentSearchDto search) {
+        return hasLocation(search.location())            // 첫 번째 조건부터 시작
+                .and(hasDate(search.date()))             // AND 로 연결
+                .and(hasTemperature(search.feelsLikeTemperature()))  // AND 로 연결
+                .and(hasMonth(search.month()))           // AND 로 연결
+                .and(hasEmail(search.email()));          // AND 로 연결
     }
     
     private static Specification<Comment> hasLocation(String location) {
