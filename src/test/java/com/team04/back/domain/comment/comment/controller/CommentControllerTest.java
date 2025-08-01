@@ -3,6 +3,7 @@ package com.team04.back.domain.comment.comment.controller;
 import com.team04.back.domain.comment.comment.entity.Comment;
 import com.team04.back.domain.comment.comment.service.CommentService;
 import com.team04.back.domain.comment.commentSearch.commentSearchCriteria.CommentSearchCriteria;
+import com.team04.back.domain.weather.geo.service.GeoService;
 import com.team04.back.domain.weather.weather.entity.WeatherInfo;
 import com.team04.back.domain.weather.weather.enums.Weather;
 import com.team04.back.domain.weather.weather.repository.WeatherRepository;
@@ -357,12 +358,18 @@ public class CommentControllerTest {
     private WeatherService weatherService;
     @Autowired
     private WeatherRepository weatherRepository;
+    @Autowired
+    private GeoService geoService;
 
     @TestConfiguration
     static class TestConfig {
         @Bean
         public WeatherService weatherService() {
             return Mockito.mock(WeatherService.class);
+        }
+        @Bean
+        public GeoService geoService() {
+            return Mockito.mock(GeoService.class);
         }
     }
 
@@ -382,7 +389,7 @@ public class CommentControllerTest {
 
         WeatherInfo saved = weatherRepository.save(mockWeatherInfo);
 
-        Mockito.when(weatherService.getCoordinatesFromLocation(eq("Seoul"), eq("KR")))
+        Mockito.when(geoService.getCoordinatesFromLocation(eq("Seoul"), eq("KR")))
                 .thenReturn(List.of(37.5665, 126.9780));
 
         Mockito.when(weatherService.getWeatherInfo(eq("Seoul"), anyDouble(), anyDouble(), any(LocalDate.class)))

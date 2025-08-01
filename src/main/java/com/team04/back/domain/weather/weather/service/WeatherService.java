@@ -1,5 +1,6 @@
 package com.team04.back.domain.weather.weather.service;
 
+import com.team04.back.domain.weather.geo.service.GeoService;
 import com.team04.back.domain.weather.weather.entity.WeatherInfo;
 import com.team04.back.domain.weather.weather.enums.Weather;
 import com.team04.back.domain.weather.weather.repository.WeatherRepository;
@@ -25,6 +26,7 @@ import java.util.Optional;
 public class WeatherService {
     private final WeatherRepository weatherRepository;
     private final WeatherApiClient weatherApiClient;
+    private final GeoService geoService;
 
     public List<WeatherInfo> getDurationWeather(String location, LocalDate start, LocalDate end) {
         return weatherRepository.findByLocationAndDateBetween(location, start, end);
@@ -42,7 +44,7 @@ public class WeatherService {
      */
     @Transactional
     public WeatherInfo getWeatherInfo(double lat, double lon, LocalDate date) {
-        String location = getLocationFromCoordinates(lat, lon);
+        String location = geoService.getLocationFromCoordinates(lat, lon);
         return getWeatherInfo(location, lat, lon, date);
     }
 
@@ -77,7 +79,7 @@ public class WeatherService {
      */
     @Transactional
     public List<WeatherInfo> getWeatherInfos(double lat, double lon, LocalDate startDate, LocalDate endDate) {
-        String location = getLocationFromCoordinates(lat, lon);
+        String location = geoService.getLocationFromCoordinates(lat, lon);
         return getWeatherInfos(location, lat, lon, startDate, endDate);
     }
 
@@ -105,24 +107,6 @@ public class WeatherService {
             date = date.plusDays(1);
         }
         return result;
-    }
-
-    // 좌표를 이용하여 지역 이름 조회
-    private String getLocationFromCoordinates(double lat, double lon) {
-        return weatherApiClient.fetchCityByCoordinates(lat, lon, 1)
-                .blockOptional()
-                .flatMap(list -> list.stream().findFirst())
-                .map(geo -> geo.getLocalNames().getKorean())
-                .orElse("알 수 없음");
-    }
-
-    // 지역 이름을 이용하여 좌표 조회
-    public List<Double> getCoordinatesFromLocation(String cityName, String countryCode) {
-        return weatherApiClient.fetchCoordinatesByCity(cityName, countryCode, 1)
-                .blockOptional()
-                .flatMap(list -> list.stream().findFirst())
-                .map(geo -> List.of(geo.getLat(), geo.getLon()))
-                .orElse(List.of(0.0, 0.0)); // 기본값으로 0.0, 0.0 반환
     }
 
     // 유효성 검사: 마지막 업데이트가 3시간 이내인지 확인

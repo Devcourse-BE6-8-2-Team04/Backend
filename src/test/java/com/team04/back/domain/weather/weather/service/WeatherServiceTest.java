@@ -1,11 +1,11 @@
 package com.team04.back.domain.weather.weather.service;
 
+import com.team04.back.domain.weather.geo.service.GeoService;
 import com.team04.back.domain.weather.weather.entity.WeatherInfo;
 import com.team04.back.domain.weather.weather.enums.Weather;
 import com.team04.back.domain.weather.weather.repository.WeatherRepository;
 import com.team04.back.infra.weather.WeatherApiClient;
 import com.team04.back.infra.weather.dto.*;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,7 +14,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
-
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
@@ -30,11 +29,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 /**
  * WeatherService 단위 테스트
  * WeatherService의 getWeatherInfo 및 getWeatherInfos 메서드에 대한 테스트 케이스를 포함합니다.
@@ -51,6 +47,9 @@ class WeatherServiceTest {
 
     @Mock
     private WeatherApiClient weatherApiClient;
+
+    @Mock
+    private GeoService geoService;
 
     private double lat;
     private double lon;
@@ -75,7 +74,7 @@ class WeatherServiceTest {
         // Given
         WeatherInfo weatherInfo = createWeatherInfo(today, LocalDateTime.now());
         given(weatherRepository.findByLocationAndDate(location, today)).willReturn(Optional.of(weatherInfo));
-        given(weatherApiClient.fetchCityByCoordinates(lat, lon, 1)).willReturn(Mono.just(List.of(createGeoReverseResponse())));
+        given(geoService.getLocationFromCoordinates(lat, lon)).willReturn(location);
 
         // When
         WeatherInfo result = weatherService.getWeatherInfo(lat, lon, today);
@@ -92,7 +91,7 @@ class WeatherServiceTest {
     void getWeatherInfo_NoDataInDB_FetchesFromApiAndSaves() {
         // Given
         given(weatherRepository.findByLocationAndDate(location, today)).willReturn(Optional.empty());
-        given(weatherApiClient.fetchCityByCoordinates(lat, lon, 1)).willReturn(Mono.just(List.of(createGeoReverseResponse())));
+        given(geoService.getLocationFromCoordinates(lat, lon)).willReturn(location);
         given(weatherApiClient.fetchOneCallWeatherData(anyDouble(), anyDouble(), any(), anyString(), anyString()))
                 .willReturn(Mono.just(createOneCallApiResponse(today)));
         given(weatherRepository.save(any(WeatherInfo.class))).willAnswer(invocation -> invocation.getArgument(0));
@@ -116,7 +115,7 @@ class WeatherServiceTest {
         WeatherInfo oldWeatherInfo = createWeatherInfo(today, LocalDateTime.now().minusHours(4));
         LocalDateTime beforeUpdate = oldWeatherInfo.getModifyDate();
         given(weatherRepository.findByLocationAndDate(location, today)).willReturn(Optional.of(oldWeatherInfo));
-        given(weatherApiClient.fetchCityByCoordinates(lat, lon, 1)).willReturn(Mono.just(List.of(createGeoReverseResponse())));
+        given(geoService.getLocationFromCoordinates(lat, lon)).willReturn(location);
         given(weatherApiClient.fetchOneCallWeatherData(anyDouble(), anyDouble(), any(), anyString(), anyString()))
                 .willReturn(Mono.just(createOneCallApiResponse(today)));
         given(weatherRepository.save(any(WeatherInfo.class))).willAnswer(invocation -> {
@@ -143,7 +142,7 @@ class WeatherServiceTest {
         // Given
         LocalDate startDate = today;
         LocalDate endDate = today.plusDays(2);
-        given(weatherApiClient.fetchCityByCoordinates(lat, lon, 1)).willReturn(Mono.just(List.of(createGeoReverseResponse())));
+        given(geoService.getLocationFromCoordinates(lat, lon)).willReturn(location);
         given(weatherRepository.findByLocationAndDate(anyString(), any(LocalDate.class))).willReturn(Optional.empty());
         given(weatherApiClient.fetchOneCallWeatherData(anyDouble(), anyDouble(), any(), anyString(), anyString()))
                 .willReturn(Mono.just(createOneCallApiResponse(startDate, endDate)));
@@ -165,7 +164,7 @@ class WeatherServiceTest {
         // Given
         LocalDate startDate = today.plusDays(1);
         LocalDate endDate = today;
-        given(weatherApiClient.fetchCityByCoordinates(lat, lon, 1)).willReturn(Mono.just(List.of(createGeoReverseResponse())));
+        given(geoService.getLocationFromCoordinates(lat, lon)).willReturn(location);
 
 
         // When & Then
@@ -180,7 +179,7 @@ class WeatherServiceTest {
         // Given
         LocalDate requestDate = today.plusDays(5);
         given(weatherRepository.findByLocationAndDate(location, requestDate)).willReturn(Optional.empty());
-        given(weatherApiClient.fetchCityByCoordinates(lat, lon, 1)).willReturn(Mono.just(List.of(createGeoReverseResponse())));
+        given(geoService.getLocationFromCoordinates(lat, lon)).willReturn(location);
         // Return API response that does not contain the requestDate
         given(weatherApiClient.fetchOneCallWeatherData(anyDouble(), anyDouble(), any(), anyString(), anyString()))
                 .willReturn(Mono.just(createOneCallApiResponse(today, today.plusDays(4))));

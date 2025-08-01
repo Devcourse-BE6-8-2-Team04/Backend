@@ -4,7 +4,6 @@ import com.team04.back.domain.weather.geo.dto.GeoLocationDto;
 import com.team04.back.infra.weather.WeatherApiClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 import java.util.List;
@@ -27,5 +26,24 @@ public class GeoService {
                         .map(GeoLocationDto::new)
                         .collect(Collectors.toList()))
                 .orElse(Collections.emptyList());
+    }
+
+
+    // 좌표를 이용하여 지역 이름 조회
+    public String getLocationFromCoordinates(double lat, double lon) {
+        return weatherApiClient.fetchCityByCoordinates(lat, lon, 1)
+                .blockOptional()
+                .flatMap(list -> list.stream().findFirst())
+                .map(geo -> geo.getLocalNames().getKorean())
+                .orElse("알 수 없음");
+    }
+
+    // 지역 이름을 이용하여 좌표 조회
+    public List<Double> getCoordinatesFromLocation(String cityName, String countryCode) {
+        return weatherApiClient.fetchCoordinatesByCity(cityName, countryCode, 1)
+                .blockOptional()
+                .flatMap(list -> list.stream().findFirst())
+                .map(geo -> List.of(geo.getLat(), geo.getLon()))
+                .orElse(List.of(0.0, 0.0)); // 기본값으로 0.0, 0.0 반환
     }
 }

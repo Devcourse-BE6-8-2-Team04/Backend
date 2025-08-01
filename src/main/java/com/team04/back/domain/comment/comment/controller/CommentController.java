@@ -4,6 +4,7 @@ import com.team04.back.domain.comment.comment.dto.CommentDto;
 import com.team04.back.domain.comment.comment.entity.Comment;
 import com.team04.back.domain.comment.comment.service.CommentService;
 import com.team04.back.domain.comment.commentSearch.commentSearchCriteria.CommentSearchCriteria;
+import com.team04.back.domain.weather.geo.service.GeoService;
 import com.team04.back.domain.weather.weather.entity.WeatherInfo;
 import com.team04.back.domain.weather.weather.service.WeatherService;
 import com.team04.back.global.rsData.RsData;
@@ -33,6 +34,7 @@ import java.util.List;
 public class CommentController {
     private final CommentService commentService;
     private final WeatherService weatherService;
+    private final GeoService geoService;
 
     /**
      * 이 API는 location, date, feelsLikeTemperature, month 파라미터를 사용하여 필터링된 커멘트 목록을 조회합니다.
@@ -156,7 +158,7 @@ public class CommentController {
     public RsData<CommentDto> createComment(
             @RequestBody @Valid CreateCommentReqBody createCommentReqBody
     ) {
-        List<Double> coordinates = weatherService.getCoordinatesFromLocation(
+        List<Double> coordinates = geoService.getCoordinatesFromLocation(
                 createCommentReqBody.cityName,
                 createCommentReqBody.countryCode
         );
@@ -210,7 +212,7 @@ public class CommentController {
     ) {
         Comment comment = commentService.findById(id).get();
 
-        List<Double> coordinates = weatherService.getCoordinatesFromLocation(
+        List<Double> coordinates = geoService.getCoordinatesFromLocation(
                 modifyCommentReqBody.cityName(),
                 modifyCommentReqBody.countryCode()
         );
