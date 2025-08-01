@@ -34,7 +34,7 @@ public class GeoService {
         return weatherApiClient.fetchCityByCoordinates(lat, lon, 1)
                 .blockOptional()
                 .flatMap(list -> list.stream().findFirst())
-                .map(geo -> geo.getLocalNames().getKorean())
+                .map(geo -> geo.getLocalNames().getKorean() != null ? geo.getLocalNames().getKorean() : geo.getName())
                 .orElse("알 수 없음");
     }
 
