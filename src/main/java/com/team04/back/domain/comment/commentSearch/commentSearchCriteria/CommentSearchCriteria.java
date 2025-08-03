@@ -12,6 +12,7 @@ public class CommentSearchCriteria {
     private LocalDate date;
     private Double feelsLikeTemperature;
     private Integer month;
+    private String email;
     
     public boolean hasLocation() {
         return location != null && !location.trim().isEmpty();

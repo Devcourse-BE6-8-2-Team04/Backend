@@ -60,6 +60,7 @@ public class CommentControllerTest {
                 .date(null)
                 .feelsLikeTemperature(null)
                 .month(null)
+                .email(null)
                 .build();
         Pageable pageable = PageRequest.of(0, 10);
         Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
@@ -100,6 +101,7 @@ public class CommentControllerTest {
                 .date(LocalDate.of(2025, 1, 1))
                 .feelsLikeTemperature(null)
                 .month(null)
+                .email(null)
                 .build();
         Pageable pageable = PageRequest.of(0, 10);
         Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
@@ -139,6 +141,7 @@ public class CommentControllerTest {
                 .date(null)
                 .feelsLikeTemperature(-4.0)
                 .month(null)
+                .email(null)
                 .build();
         Pageable pageable = PageRequest.of(0, 10);
         Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
@@ -171,6 +174,7 @@ public class CommentControllerTest {
                 .date(null)
                 .feelsLikeTemperature(null)
                 .month(null)
+                .email(null)
                 .build();
         Pageable pageable = PageRequest.of(0, 10);
         Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
@@ -231,6 +235,130 @@ public class CommentControllerTest {
                 .date(null)
                 .feelsLikeTemperature(null)
                 .month(1) // 1월 필터링
+                .email(null)
+                .build();
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
+        int size = comments.getContent().size();
+
+        resultActions
+                .andExpect(handler().handlerType(CommentController.class))
+                .andExpect(handler().methodName("getComments"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(size));
+
+        for (int i = 0; i < size; i++) {
+            Comment comment = comments.getContent().get(size - i - 1); // 역순
+            resultActions
+                    .andExpect(jsonPath("$.content[%d].id".formatted(i)).value(comment.getId()))
+                    .andExpect(jsonPath("$.content[%d].email".formatted(i)).value(comment.getEmail()))
+                    .andExpect(jsonPath("$.content[%d].imageUrl".formatted(i)).value(comment.getImageUrl()))
+                    .andExpect(jsonPath("$.content[%d].title".formatted(i)).value(comment.getTitle()))
+                    .andExpect(jsonPath("$.content[%d].sentence".formatted(i)).value(comment.getSentence()))
+                    .andExpect(jsonPath("$.content[%d].tagString".formatted(i)).value(comment.getTagString()))
+                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.location".formatted(i)).value(comment.getWeatherInfo().getLocation()))
+                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.date".formatted(i)).value(comment.getWeatherInfo().getDate().toString()))
+                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.feelsLikeTemperature".formatted(i)).value(comment.getWeatherInfo().getFeelsLikeTemperature()));
+        }
+    }
+
+    @Test
+    @DisplayName("커멘트 조건 검색 - 위치 필터링")
+    public void t6_1() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/v1/comments")
+                                .param("location", "Seoul") // 서울 위치 필터링
+                ).andDo(print());
+
+        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
+                .location("Seoul")
+                .date(null)
+                .feelsLikeTemperature(null)
+                .month(null)
+                .email(null)
+                .build();
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
+        int size = comments.getContent().size();
+
+        resultActions
+                .andExpect(handler().handlerType(CommentController.class))
+                .andExpect(handler().methodName("getComments"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(size));
+
+        for (int i = 0; i < size; i++) {
+            Comment comment = comments.getContent().get(size - i - 1); // 역순
+            resultActions
+                    .andExpect(jsonPath("$.content[%d].id".formatted(i)).value(comment.getId()))
+                    .andExpect(jsonPath("$.content[%d].email".formatted(i)).value(comment.getEmail()))
+                    .andExpect(jsonPath("$.content[%d].imageUrl".formatted(i)).value(comment.getImageUrl()))
+                    .andExpect(jsonPath("$.content[%d].title".formatted(i)).value(comment.getTitle()))
+                    .andExpect(jsonPath("$.content[%d].sentence".formatted(i)).value(comment.getSentence()))
+                    .andExpect(jsonPath("$.content[%d].tagString".formatted(i)).value(comment.getTagString()))
+                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.location".formatted(i)).value(comment.getWeatherInfo().getLocation()))
+                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.date".formatted(i)).value(comment.getWeatherInfo().getDate().toString()))
+                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.feelsLikeTemperature".formatted(i)).value(comment.getWeatherInfo().getFeelsLikeTemperature()));
+        }
+    }
+
+    @Test
+    @DisplayName("커멘트 조건 검색 - 체감 온도 필터링")
+    public void t6_2() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/v1/comments")
+                                .param("feelsLikeTemperature", "20.0") // 체감 온도 20도 필터링
+                ).andDo(print());
+
+        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
+                .location(null)
+                .date(null)
+                .feelsLikeTemperature(20.0) // 체감 온도 20도 필터링
+                .month(null)
+                .email(null)
+                .build();
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
+        int size = comments.getContent().size();
+
+        resultActions
+                .andExpect(handler().handlerType(CommentController.class))
+                .andExpect(handler().methodName("getComments"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(size));
+
+        for (int i = 0; i < size; i++) {
+            Comment comment = comments.getContent().get(size - i - 1); // 역순
+            resultActions
+                    .andExpect(jsonPath("$.content[%d].id".formatted(i)).value(comment.getId()))
+                    .andExpect(jsonPath("$.content[%d].email".formatted(i)).value(comment.getEmail()))
+                    .andExpect(jsonPath("$.content[%d].imageUrl".formatted(i)).value(comment.getImageUrl()))
+                    .andExpect(jsonPath("$.content[%d].title".formatted(i)).value(comment.getTitle()))
+                    .andExpect(jsonPath("$.content[%d].sentence".formatted(i)).value(comment.getSentence()))
+                    .andExpect(jsonPath("$.content[%d].tagString".formatted(i)).value(comment.getTagString()))
+                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.location".formatted(i)).value(comment.getWeatherInfo().getLocation()))
+                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.date".formatted(i)).value(comment.getWeatherInfo().getDate().toString()))
+                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.feelsLikeTemperature".formatted(i)).value(comment.getWeatherInfo().getFeelsLikeTemperature()));
+        }
+    }
+
+    @Test
+    @DisplayName("커멘트 조건 검색 - 이메일 필터링")
+    public void t6_3() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/v1/comments")
+                                .param("email", "user1@test.com") // 이메일 필터링
+                ).andDo(print());
+
+        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
+                .location(null)
+                .date(null)
+                .feelsLikeTemperature(null)
+                .month(null)
+                .email("user1@test.com") // 이메일 필터링
                 .build();
         Pageable pageable = PageRequest.of(0, 10);
         Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
@@ -265,6 +393,7 @@ public class CommentControllerTest {
                 .date(null)
                 .feelsLikeTemperature(null)
                 .month(null)
+                .email(null)
                 .build();
         Pageable pageable = PageRequest.of(0, 10);
         Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
@@ -299,6 +428,7 @@ public class CommentControllerTest {
                 .date(null)
                 .feelsLikeTemperature(null)
                 .month(null)
+                .email(null)
                 .build();
         Pageable pageable = PageRequest.of(0, 10);
         Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
@@ -333,6 +463,7 @@ public class CommentControllerTest {
                 .date(null)
                 .feelsLikeTemperature(null)
                 .month(null)
+                .email(null)
                 .build();
         Pageable pageable = PageRequest.of(0, 10);
         Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
@@ -445,6 +576,7 @@ public class CommentControllerTest {
                 .date(null)
                 .feelsLikeTemperature(null)
                 .month(null)
+                .email(null)
                 .build();
         Pageable pageable = PageRequest.of(0, 10);
         Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
