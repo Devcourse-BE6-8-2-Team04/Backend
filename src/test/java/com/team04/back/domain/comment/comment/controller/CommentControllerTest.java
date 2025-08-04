@@ -67,7 +67,7 @@ public class CommentControllerTest {
                 .andExpect(jsonPath("$.content.length()").value(size));
 
         for (int i = 0; i < size; i++) {
-            Comment comment = comments.getContent().get(size - i - 1); // 역순으로 조회
+            Comment comment = comments.getContent().get(i);
             resultActions
                     .andExpect(jsonPath("$.content[%d].email".formatted(i)).value(comment.getEmail()))
                     .andExpect(jsonPath("$.content[%d].imageUrl".formatted(i)).value(comment.getImageUrl()))
@@ -101,7 +101,7 @@ public class CommentControllerTest {
                 .andExpect(status().isOk());
 
         for (int i = 0; i < size; i++) {
-            Comment comment = comments.getContent().get(size - i - 1); // 역순으로 조회
+            Comment comment = comments.getContent().get(i);
             resultActions
                     .andExpect(jsonPath("$.content[%d].id".formatted(i)).value(comment.getId()))
                     .andExpect(jsonPath("$.content[%d].email".formatted(i)).value(comment.getEmail()))
@@ -135,7 +135,7 @@ public class CommentControllerTest {
                 .andExpect(status().isOk());
 
         for (int i = 0; i < size; i++) {
-            Comment comment = comments.getContent().get(size - i - 1); // 역순으로 조회
+            Comment comment = comments.getContent().get(i);
             resultActions
                     .andExpect(jsonPath("$.content[%d].id".formatted(i)).value(comment.getId()))
                     .andExpect(jsonPath("$.content[%d].email".formatted(i)).value(comment.getEmail()))
@@ -169,7 +169,7 @@ public class CommentControllerTest {
                 .andExpect(jsonPath("$.content.length()").value(size));
 
         for (int i = 0; i < size; i++) {
-            Comment comment = comments.getContent().get(size - i - 1); // 역순
+            Comment comment = comments.getContent().get(i);
             resultActions
                     .andExpect(jsonPath("$.content[%d].id".formatted(i)).value(comment.getId()))
                     .andExpect(jsonPath("$.content[%d].email".formatted(i)).value(comment.getEmail()))
@@ -204,7 +204,7 @@ public class CommentControllerTest {
                 .andExpect(jsonPath("$.content.length()").value(size));
 
         for (int i = 0; i < size; i++) {
-            Comment comment = comments.getContent().get(size - i - 1); // 역순
+            Comment comment = comments.getContent().get(i);
             resultActions
                     .andExpect(jsonPath("$.content[%d].id".formatted(i)).value(comment.getId()))
                     .andExpect(jsonPath("$.content[%d].email".formatted(i)).value(comment.getEmail()))

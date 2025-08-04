@@ -22,4 +22,24 @@ public record CommentSearchDto (
         this.month = month;
         this.email = email;
     }
+
+    public boolean hasLocation() {
+        return location != null && !location.isBlank();
+    }
+
+    public boolean hasDate() {
+        return date != null;
+    }
+
+    public boolean hasFeelsLikeTemperature() {
+        return feelsLikeTemperature != null;
+    }
+
+    public boolean hasMonth() {
+        return month != null;
+    }
+
+    public boolean hasEmail() {
+        return email != null && !email.isBlank();
+    }
 }
