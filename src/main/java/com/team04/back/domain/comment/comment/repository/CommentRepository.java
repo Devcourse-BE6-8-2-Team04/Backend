@@ -10,8 +10,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface CommentRepository extends JpaRepository<Comment, Integer> {
-    Page<Comment> findAll(Specification<Comment> commentSpecification, Pageable pageable);
-
+public interface CommentRepository extends JpaRepository<Comment, Integer>, CommentRepositoryCustom {
     Optional<Comment> findFirstByOrderByIdDesc();
 }

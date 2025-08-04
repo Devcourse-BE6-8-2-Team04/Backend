@@ -2,7 +2,7 @@ package com.team04.back.domain.comment.comment.controller;
 
 import com.team04.back.domain.comment.comment.entity.Comment;
 import com.team04.back.domain.comment.comment.service.CommentService;
-import com.team04.back.domain.comment.commentSearch.commentSearchCriteria.CommentSearchCriteria;
+import com.team04.back.domain.comment.comment.dto.CommentSearchDto;
 import com.team04.back.domain.weather.geo.service.GeoService;
 import com.team04.back.domain.weather.weather.entity.WeatherInfo;
 import com.team04.back.domain.weather.weather.enums.Weather;
@@ -55,15 +55,9 @@ public class CommentControllerTest {
                         get("/api/v1/comments")
                 ).andDo(print());
 
-        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
-                .location(null)
-                .date(null)
-                .feelsLikeTemperature(null)
-                .month(null)
-                .email(null)
-                .build();
+        CommentSearchDto search = new CommentSearchDto(null, null, null, null, null);
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
+        Page<Comment> comments = commentService.findBySearch(search, pageable);
         int size = comments.getContent().size();
 
         resultActions
@@ -73,7 +67,7 @@ public class CommentControllerTest {
                 .andExpect(jsonPath("$.content.length()").value(size));
 
         for (int i = 0; i < size; i++) {
-            Comment comment = comments.getContent().get(size - i - 1); // 역순으로 조회
+            Comment comment = comments.getContent().get(i);
             resultActions
                     .andExpect(jsonPath("$.content[%d].email".formatted(i)).value(comment.getEmail()))
                     .andExpect(jsonPath("$.content[%d].imageUrl".formatted(i)).value(comment.getImageUrl()))
@@ -87,8 +81,8 @@ public class CommentControllerTest {
     }
 
     @Test
-    @DisplayName("커멘트 날짜 기반 검색")
-    public void t2() throws Exception {
+    @DisplayName("커멘트 조건 조회 - 위치, 날짜 필터링")
+    public void t2_1() throws Exception {
         ResultActions resultActions = mvc
                 .perform(
                         get("/api/v1/comments")
@@ -96,15 +90,9 @@ public class CommentControllerTest {
                                 .param("date", "2025-01-01")
                 ).andDo(print());
 
-        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
-                .location("삿포로")
-                .date(LocalDate.of(2025, 1, 1))
-                .feelsLikeTemperature(null)
-                .month(null)
-                .email(null)
-                .build();
+        CommentSearchDto search = new CommentSearchDto("삿포로", LocalDate.of(2025, 1, 1), null, null, null);
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
+        Page<Comment> comments = commentService.findBySearch(search, pageable);
         int size = comments.getContent().size();
 
         resultActions
@@ -113,7 +101,7 @@ public class CommentControllerTest {
                 .andExpect(status().isOk());
 
         for (int i = 0; i < size; i++) {
-            Comment comment = comments.getContent().get(size - i - 1); // 역순으로 조회
+            Comment comment = comments.getContent().get(i);
             resultActions
                     .andExpect(jsonPath("$.content[%d].id".formatted(i)).value(comment.getId()))
                     .andExpect(jsonPath("$.content[%d].email".formatted(i)).value(comment.getEmail()))
@@ -127,8 +115,8 @@ public class CommentControllerTest {
     }
 
     @Test
-    @DisplayName("커멘트 체감온도 기반 검색")
-    public void t3() throws Exception {
+    @DisplayName("커멘트 조건 조회 - 위치, 체감 온도 필터링")
+    public void t2_2() throws Exception {
         ResultActions resultActions = mvc
                 .perform(
                         get("/api/v1/comments")
@@ -136,15 +124,9 @@ public class CommentControllerTest {
                                 .param("feelsLikeTemperature", "-4.0")
                 ).andDo(print());
 
-        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
-                .location("삿포로")
-                .date(null)
-                .feelsLikeTemperature(-4.0)
-                .month(null)
-                .email(null)
-                .build();
+        CommentSearchDto search = new CommentSearchDto("삿포로", null, -4.0, null, null);
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
+        Page<Comment> comments = commentService.findBySearch(search, pageable);
         int size = comments.getContent().size();
 
         resultActions
@@ -153,7 +135,7 @@ public class CommentControllerTest {
                 .andExpect(status().isOk());
 
         for (int i = 0; i < size; i++) {
-            Comment comment = comments.getContent().get(size - i - 1); // 역순으로 조회
+            Comment comment = comments.getContent().get(i);
             resultActions
                     .andExpect(jsonPath("$.content[%d].id".formatted(i)).value(comment.getId()))
                     .andExpect(jsonPath("$.content[%d].email".formatted(i)).value(comment.getEmail()))
@@ -167,17 +149,81 @@ public class CommentControllerTest {
     }
 
     @Test
-    @DisplayName("커멘트 단건 조회")
-    public void t4() throws Exception {
-        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
-                .location(null)
-                .date(null)
-                .feelsLikeTemperature(null)
-                .month(null)
-                .email(null)
-                .build();
+    @DisplayName("커멘트 조건 조회 - 월 필터링")
+    public void t2_3() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/v1/comments")
+                                .param("month", "1") // 1월 필터링
+                ).andDo(print());
+
+        CommentSearchDto search = new CommentSearchDto(null, null, null, 1, null);
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
+        Page<Comment> comments = commentService.findBySearch(search, pageable);
+        int size = comments.getContent().size();
+
+        resultActions
+                .andExpect(handler().handlerType(CommentController.class))
+                .andExpect(handler().methodName("getComments"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(size));
+
+        for (int i = 0; i < size; i++) {
+            Comment comment = comments.getContent().get(i);
+            resultActions
+                    .andExpect(jsonPath("$.content[%d].id".formatted(i)).value(comment.getId()))
+                    .andExpect(jsonPath("$.content[%d].email".formatted(i)).value(comment.getEmail()))
+                    .andExpect(jsonPath("$.content[%d].imageUrl".formatted(i)).value(comment.getImageUrl()))
+                    .andExpect(jsonPath("$.content[%d].title".formatted(i)).value(comment.getTitle()))
+                    .andExpect(jsonPath("$.content[%d].sentence".formatted(i)).value(comment.getSentence()))
+                    .andExpect(jsonPath("$.content[%d].tagString".formatted(i)).value(comment.getTagString()))
+                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.location".formatted(i)).value(comment.getWeatherInfo().getLocation()))
+                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.date".formatted(i)).value(comment.getWeatherInfo().getDate().toString()))
+                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.feelsLikeTemperature".formatted(i)).value(comment.getWeatherInfo().getFeelsLikeTemperature()));
+        }
+    }
+
+    @Test
+    @DisplayName("커멘트 조건 조회 - 이메일 필터링")
+    public void t2_4() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/v1/comments")
+                                .param("email", "user1@test.com") // 이메일 필터링
+                ).andDo(print());
+
+        CommentSearchDto search = new CommentSearchDto(null, null, null, null, "user1@test.com");
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Comment> comments = commentService.findBySearch(search, pageable);
+        int size = comments.getContent().size();
+
+        resultActions
+                .andExpect(handler().handlerType(CommentController.class))
+                .andExpect(handler().methodName("getComments"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(size));
+
+        for (int i = 0; i < size; i++) {
+            Comment comment = comments.getContent().get(i);
+            resultActions
+                    .andExpect(jsonPath("$.content[%d].id".formatted(i)).value(comment.getId()))
+                    .andExpect(jsonPath("$.content[%d].email".formatted(i)).value(comment.getEmail()))
+                    .andExpect(jsonPath("$.content[%d].imageUrl".formatted(i)).value(comment.getImageUrl()))
+                    .andExpect(jsonPath("$.content[%d].title".formatted(i)).value(comment.getTitle()))
+                    .andExpect(jsonPath("$.content[%d].sentence".formatted(i)).value(comment.getSentence()))
+                    .andExpect(jsonPath("$.content[%d].tagString".formatted(i)).value(comment.getTagString()))
+                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.location".formatted(i)).value(comment.getWeatherInfo().getLocation()))
+                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.date".formatted(i)).value(comment.getWeatherInfo().getDate().toString()))
+                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.feelsLikeTemperature".formatted(i)).value(comment.getWeatherInfo().getFeelsLikeTemperature()));
+        }
+    }
+
+    @Test
+    @DisplayName("커멘트 단건 조회")
+    public void t3() throws Exception {
+        CommentSearchDto search = new CommentSearchDto(null, null, null, null, null);
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Comment> comments = commentService.findBySearch(search, pageable);
 
         int id = comments.getContent().get(0).getId();
 
@@ -205,7 +251,7 @@ public class CommentControllerTest {
 
     @Test
     @DisplayName("커멘트 단건 조회 - 존재하지 않는 ID")
-    public void t5() throws Exception {
+    public void t3_1() throws Exception {
         int id = Integer.MAX_VALUE; // 존재하지 않는 ID
 
         ResultActions resultActions = mvc
@@ -222,181 +268,11 @@ public class CommentControllerTest {
     }
 
     @Test
-    @DisplayName("커멘트 조건 검색 - 월 필터링")
-    public void t6() throws Exception {
-        ResultActions resultActions = mvc
-                .perform(
-                        get("/api/v1/comments")
-                                .param("month", "1") // 1월 필터링
-                ).andDo(print());
-
-        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
-                .location(null)
-                .date(null)
-                .feelsLikeTemperature(null)
-                .month(1) // 1월 필터링
-                .email(null)
-                .build();
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
-        int size = comments.getContent().size();
-
-        resultActions
-                .andExpect(handler().handlerType(CommentController.class))
-                .andExpect(handler().methodName("getComments"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.length()").value(size));
-
-        for (int i = 0; i < size; i++) {
-            Comment comment = comments.getContent().get(size - i - 1); // 역순
-            resultActions
-                    .andExpect(jsonPath("$.content[%d].id".formatted(i)).value(comment.getId()))
-                    .andExpect(jsonPath("$.content[%d].email".formatted(i)).value(comment.getEmail()))
-                    .andExpect(jsonPath("$.content[%d].imageUrl".formatted(i)).value(comment.getImageUrl()))
-                    .andExpect(jsonPath("$.content[%d].title".formatted(i)).value(comment.getTitle()))
-                    .andExpect(jsonPath("$.content[%d].sentence".formatted(i)).value(comment.getSentence()))
-                    .andExpect(jsonPath("$.content[%d].tagString".formatted(i)).value(comment.getTagString()))
-                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.location".formatted(i)).value(comment.getWeatherInfo().getLocation()))
-                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.date".formatted(i)).value(comment.getWeatherInfo().getDate().toString()))
-                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.feelsLikeTemperature".formatted(i)).value(comment.getWeatherInfo().getFeelsLikeTemperature()));
-        }
-    }
-
-    @Test
-    @DisplayName("커멘트 조건 검색 - 위치 필터링")
-    public void t6_1() throws Exception {
-        ResultActions resultActions = mvc
-                .perform(
-                        get("/api/v1/comments")
-                                .param("location", "Seoul") // 서울 위치 필터링
-                ).andDo(print());
-
-        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
-                .location("Seoul")
-                .date(null)
-                .feelsLikeTemperature(null)
-                .month(null)
-                .email(null)
-                .build();
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
-        int size = comments.getContent().size();
-
-        resultActions
-                .andExpect(handler().handlerType(CommentController.class))
-                .andExpect(handler().methodName("getComments"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.length()").value(size));
-
-        for (int i = 0; i < size; i++) {
-            Comment comment = comments.getContent().get(size - i - 1); // 역순
-            resultActions
-                    .andExpect(jsonPath("$.content[%d].id".formatted(i)).value(comment.getId()))
-                    .andExpect(jsonPath("$.content[%d].email".formatted(i)).value(comment.getEmail()))
-                    .andExpect(jsonPath("$.content[%d].imageUrl".formatted(i)).value(comment.getImageUrl()))
-                    .andExpect(jsonPath("$.content[%d].title".formatted(i)).value(comment.getTitle()))
-                    .andExpect(jsonPath("$.content[%d].sentence".formatted(i)).value(comment.getSentence()))
-                    .andExpect(jsonPath("$.content[%d].tagString".formatted(i)).value(comment.getTagString()))
-                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.location".formatted(i)).value(comment.getWeatherInfo().getLocation()))
-                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.date".formatted(i)).value(comment.getWeatherInfo().getDate().toString()))
-                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.feelsLikeTemperature".formatted(i)).value(comment.getWeatherInfo().getFeelsLikeTemperature()));
-        }
-    }
-
-    @Test
-    @DisplayName("커멘트 조건 검색 - 체감 온도 필터링")
-    public void t6_2() throws Exception {
-        ResultActions resultActions = mvc
-                .perform(
-                        get("/api/v1/comments")
-                                .param("feelsLikeTemperature", "20.0") // 체감 온도 20도 필터링
-                ).andDo(print());
-
-        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
-                .location(null)
-                .date(null)
-                .feelsLikeTemperature(20.0) // 체감 온도 20도 필터링
-                .month(null)
-                .email(null)
-                .build();
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
-        int size = comments.getContent().size();
-
-        resultActions
-                .andExpect(handler().handlerType(CommentController.class))
-                .andExpect(handler().methodName("getComments"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.length()").value(size));
-
-        for (int i = 0; i < size; i++) {
-            Comment comment = comments.getContent().get(size - i - 1); // 역순
-            resultActions
-                    .andExpect(jsonPath("$.content[%d].id".formatted(i)).value(comment.getId()))
-                    .andExpect(jsonPath("$.content[%d].email".formatted(i)).value(comment.getEmail()))
-                    .andExpect(jsonPath("$.content[%d].imageUrl".formatted(i)).value(comment.getImageUrl()))
-                    .andExpect(jsonPath("$.content[%d].title".formatted(i)).value(comment.getTitle()))
-                    .andExpect(jsonPath("$.content[%d].sentence".formatted(i)).value(comment.getSentence()))
-                    .andExpect(jsonPath("$.content[%d].tagString".formatted(i)).value(comment.getTagString()))
-                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.location".formatted(i)).value(comment.getWeatherInfo().getLocation()))
-                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.date".formatted(i)).value(comment.getWeatherInfo().getDate().toString()))
-                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.feelsLikeTemperature".formatted(i)).value(comment.getWeatherInfo().getFeelsLikeTemperature()));
-        }
-    }
-
-    @Test
-    @DisplayName("커멘트 조건 검색 - 이메일 필터링")
-    public void t6_3() throws Exception {
-        ResultActions resultActions = mvc
-                .perform(
-                        get("/api/v1/comments")
-                                .param("email", "user1@test.com") // 이메일 필터링
-                ).andDo(print());
-
-        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
-                .location(null)
-                .date(null)
-                .feelsLikeTemperature(null)
-                .month(null)
-                .email("user1@test.com") // 이메일 필터링
-                .build();
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
-        int size = comments.getContent().size();
-
-        resultActions
-                .andExpect(handler().handlerType(CommentController.class))
-                .andExpect(handler().methodName("getComments"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.length()").value(size));
-
-        for (int i = 0; i < size; i++) {
-            Comment comment = comments.getContent().get(size - i - 1); // 역순
-            resultActions
-                    .andExpect(jsonPath("$.content[%d].id".formatted(i)).value(comment.getId()))
-                    .andExpect(jsonPath("$.content[%d].email".formatted(i)).value(comment.getEmail()))
-                    .andExpect(jsonPath("$.content[%d].imageUrl".formatted(i)).value(comment.getImageUrl()))
-                    .andExpect(jsonPath("$.content[%d].title".formatted(i)).value(comment.getTitle()))
-                    .andExpect(jsonPath("$.content[%d].sentence".formatted(i)).value(comment.getSentence()))
-                    .andExpect(jsonPath("$.content[%d].tagString".formatted(i)).value(comment.getTagString()))
-                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.location".formatted(i)).value(comment.getWeatherInfo().getLocation()))
-                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.date".formatted(i)).value(comment.getWeatherInfo().getDate().toString()))
-                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.feelsLikeTemperature".formatted(i)).value(comment.getWeatherInfo().getFeelsLikeTemperature()));
-        }
-    }
-
-    @Test
     @DisplayName("커멘트 비밀번호 검증")
-    public void t7() throws Exception {
-        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
-                .location(null)
-                .date(null)
-                .feelsLikeTemperature(null)
-                .month(null)
-                .email(null)
-                .build();
+    public void t4() throws Exception {
+        CommentSearchDto search = new CommentSearchDto(null, null, null, null, null);
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
+        Page<Comment> comments = commentService.findBySearch(search, pageable);
 
         int id = comments.getContent().get(0).getId();
 
@@ -422,16 +298,10 @@ public class CommentControllerTest {
 
     @Test
     @DisplayName("커멘트 비밀번호 검증 - 잘못된 비밀번호")
-    public void t8() throws Exception {
-        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
-                .location(null)
-                .date(null)
-                .feelsLikeTemperature(null)
-                .month(null)
-                .email(null)
-                .build();
+    public void t4_1() throws Exception {
+        CommentSearchDto search = new CommentSearchDto(null, null, null, null, null);
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
+        Page<Comment> comments = commentService.findBySearch(search, pageable);
 
         int id = comments.getContent().get(0).getId();
 
@@ -457,16 +327,10 @@ public class CommentControllerTest {
 
     @Test
     @DisplayName("커멘트 삭제")
-    public void t9() throws Exception {
-        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
-                .location(null)
-                .date(null)
-                .feelsLikeTemperature(null)
-                .month(null)
-                .email(null)
-                .build();
+    public void t5() throws Exception {
+        CommentSearchDto search = new CommentSearchDto(null, null, null, null, null);
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
+        Page<Comment> comments = commentService.findBySearch(search, pageable);
 
         int id = comments.getContent().get(0).getId();
 
@@ -529,7 +393,7 @@ public class CommentControllerTest {
 
     @Test
     @DisplayName("커멘트 작성")
-    public void t10() throws Exception {
+    public void t6() throws Exception {
         ResultActions resultActions = mvc
                 .perform(
                         post("/api/v1/comments")
@@ -569,17 +433,106 @@ public class CommentControllerTest {
     }
 
     @Test
+    @DisplayName("커멘트 작성 - inValid email")
+    public void t6_1() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        post("/api/v1/comments")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                            "email": "invalid-email",
+                                            "password": "1234",
+                                            "title": "Test Comment",
+                                            "sentence": "This is a test comment.",
+                                            "imageUrl": "http://example.com/image.jpg",
+                                            "tagString": "#test#comment",
+                                            "countryCode": "KR",
+                                            "cityName": "Seoul",
+                                            "date": "2025-01-01"
+                                        }
+                                        """)
+                ).andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(CommentController.class))
+                .andExpect(handler().methodName("createComment"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.resultCode").value("400-1"))
+                .andExpect(jsonPath("$.msg").value("""
+                        email-Email-must be a well-formed email address
+                        """.stripIndent().trim()));
+    }
+
+    @Test
+    @DisplayName("커멘트 작성 - inValid title")
+    public void t6_2() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        post("/api/v1/comments")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                            "email": "user@test.com",
+                                            "password": "1234",
+                                            "title": "",
+                                            "sentence": "This is a test comment.",
+                                            "imageUrl": "http://example.com/image.jpg",
+                                            "tagString": "#test#comment",
+                                            "countryCode": "KR",
+                                            "cityName": "Seoul",
+                                            "date": "2025-01-01"
+                                        }
+                                        """)
+                ).andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(CommentController.class))
+                .andExpect(handler().methodName("createComment"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.resultCode").value("400-1"))
+                .andExpect(jsonPath("$.msg").value("""
+                        title-NotBlank-must not be blank
+                        title-Size-size must be between 2 and 100
+                        """.stripIndent().trim()));
+    }
+
+    @Test
+    @DisplayName("커멘트 작성 - inValid date")
+    public void t6_3() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        post("/api/v1/comments")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                            "email": "user@test.com",
+                                            "password": "1234",
+                                            "title": "Test Comment",
+                                            "sentence": "This is a test comment.",
+                                            "imageUrl": "http://example.com/image.jpg",
+                                            "tagString": "#test#comment",
+                                            "countryCode": "KR",
+                                            "cityName": "Seoul",
+                                            "date": "2025-13-01"
+                                        }
+                                        """)
+                ).andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(CommentController.class))
+                .andExpect(handler().methodName("createComment"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.resultCode").value("400-1"))
+                .andExpect(jsonPath("$.msg").value("요청 본문이 올바르지 않습니다."));
+    }
+
+    @Test
     @DisplayName("커멘트 수정")
-    public void t11() throws Exception {
-        CommentSearchCriteria criteria = CommentSearchCriteria.builder()
-                .location(null)
-                .date(null)
-                .feelsLikeTemperature(null)
-                .month(null)
-                .email(null)
-                .build();
+    public void t7() throws Exception {
+        CommentSearchDto search = new CommentSearchDto(null, null, null, null, null);
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findByCriteria(criteria, pageable);
+        Page<Comment> comments = commentService.findBySearch(search, pageable);
 
         int id = comments.getContent().get(0).getId();
 
@@ -617,100 +570,5 @@ public class CommentControllerTest {
                 .andExpect(jsonPath("$.data.weatherInfoDto.location").value(comment.getWeatherInfo().getLocation()))
                 .andExpect(jsonPath("$.data.weatherInfoDto.date").value(comment.getWeatherInfo().getDate().toString()))
                 .andExpect(jsonPath("$.data.weatherInfoDto.feelsLikeTemperature").value(comment.getWeatherInfo().getFeelsLikeTemperature()));
-    }
-
-    @Test
-    @DisplayName("커멘트 작성 - inValid email")
-    public void t12() throws Exception {
-        ResultActions resultActions = mvc
-                .perform(
-                        post("/api/v1/comments")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content("""
-                                        {
-                                            "email": "invalid-email",
-                                            "password": "1234",
-                                            "title": "Test Comment",
-                                            "sentence": "This is a test comment.",
-                                            "imageUrl": "http://example.com/image.jpg",
-                                            "tagString": "#test#comment",
-                                            "countryCode": "KR",
-                                            "cityName": "Seoul",
-                                            "date": "2025-01-01"
-                                        }
-                                        """)
-                ).andDo(print());
-
-        resultActions
-                .andExpect(handler().handlerType(CommentController.class))
-                .andExpect(handler().methodName("createComment"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.resultCode").value("400-1"))
-                .andExpect(jsonPath("$.msg").value("""
-                        email-Email-must be a well-formed email address
-                        """.stripIndent().trim()));
-    }
-
-    @Test
-    @DisplayName("커멘트 작성 - inValid title")
-    public void t13() throws Exception {
-        ResultActions resultActions = mvc
-                .perform(
-                        post("/api/v1/comments")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content("""
-                                        {
-                                            "email": "user@test.com",
-                                            "password": "1234",
-                                            "title": "",
-                                            "sentence": "This is a test comment.",
-                                            "imageUrl": "http://example.com/image.jpg",
-                                            "tagString": "#test#comment",
-                                            "countryCode": "KR",
-                                            "cityName": "Seoul",
-                                            "date": "2025-01-01"
-                                        }
-                                        """)
-                ).andDo(print());
-
-        resultActions
-                .andExpect(handler().handlerType(CommentController.class))
-                .andExpect(handler().methodName("createComment"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.resultCode").value("400-1"))
-                .andExpect(jsonPath("$.msg").value("""
-                        title-NotBlank-must not be blank
-                        title-Size-size must be between 2 and 100
-                        """.stripIndent().trim()));
-    }
-
-    @Test
-    @DisplayName("커멘트 작성 - inValid date")
-    public void t14() throws Exception {
-        ResultActions resultActions = mvc
-                .perform(
-                        post("/api/v1/comments")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content("""
-                                        {
-                                            "email": "user@test.com",
-                                            "password": "1234",
-                                            "title": "Test Comment",
-                                            "sentence": "This is a test comment.",
-                                            "imageUrl": "http://example.com/image.jpg",
-                                            "tagString": "#test#comment",
-                                            "countryCode": "KR",
-                                            "cityName": "Seoul",
-                                            "date": "2025-13-01"
-                                        }
-                                        """)
-                ).andDo(print());
-
-        resultActions
-                .andExpect(handler().handlerType(CommentController.class))
-                .andExpect(handler().methodName("createComment"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.resultCode").value("400-1"))
-                .andExpect(jsonPath("$.msg").value("요청 본문이 올바르지 않습니다."));
     }
 }

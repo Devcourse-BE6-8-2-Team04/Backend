@@ -2,8 +2,7 @@ package com.team04.back.domain.comment.comment.service;
 
 import com.team04.back.domain.comment.comment.entity.Comment;
 import com.team04.back.domain.comment.comment.repository.CommentRepository;
-import com.team04.back.domain.comment.commentSearch.commentSearchCriteria.CommentSearchCriteria;
-import com.team04.back.domain.comment.commentSearch.commentSpecification.CommentSpecification;
+import com.team04.back.domain.comment.comment.dto.CommentSearchDto;
 import com.team04.back.domain.weather.weather.entity.WeatherInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,11 +28,8 @@ public class CommentService {
         return commentRepository.findById(id);
     }
 
-    public Page<Comment> findByCriteria(CommentSearchCriteria criteria, Pageable pageable) {
-        return commentRepository.findAll(
-                CommentSpecification.withCriteria(criteria),
-                pageable
-        );
+    public Page<Comment> findBySearch(CommentSearchDto search, Pageable pageable) {
+        return commentRepository.findBySearch(search, pageable);
     }
 
     public boolean verifyPassword(Comment comment, String password) {
