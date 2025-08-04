@@ -81,8 +81,8 @@ public class CommentControllerTest {
     }
 
     @Test
-    @DisplayName("커멘트 날짜 기반 검색")
-    public void t2() throws Exception {
+    @DisplayName("커멘트 조건 조회 - 위치, 날짜 필터링")
+    public void t2_1() throws Exception {
         ResultActions resultActions = mvc
                 .perform(
                         get("/api/v1/comments")
@@ -115,8 +115,8 @@ public class CommentControllerTest {
     }
 
     @Test
-    @DisplayName("커멘트 체감온도 기반 검색")
-    public void t3() throws Exception {
+    @DisplayName("커멘트 조건 조회 - 위치, 체감 온도 필터링")
+    public void t2_2() throws Exception {
         ResultActions resultActions = mvc
                 .perform(
                         get("/api/v1/comments")
@@ -149,57 +149,8 @@ public class CommentControllerTest {
     }
 
     @Test
-    @DisplayName("커멘트 단건 조회")
-    public void t4() throws Exception {
-        CommentSearchDto search = new CommentSearchDto(null, null, null, null, null);
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> comments = commentService.findBySearch(search, pageable);
-
-        int id = comments.getContent().get(0).getId();
-
-        ResultActions resultActions = mvc
-                .perform(
-                        get("/api/v1/comments/" + id)
-                ).andDo(print());
-
-        Comment comment = commentService.findById(id).get();
-
-        resultActions
-                .andExpect(handler().handlerType(CommentController.class))
-                .andExpect(handler().methodName("getComment"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(comment.getId()))
-                .andExpect(jsonPath("$.email").value(comment.getEmail()))
-                .andExpect(jsonPath("$.imageUrl").value(comment.getImageUrl()))
-                .andExpect(jsonPath("$.title").value(comment.getTitle()))
-                .andExpect(jsonPath("$.sentence").value(comment.getSentence()))
-                .andExpect(jsonPath("$.tagString").value(comment.getTagString()))
-                .andExpect(jsonPath("$.weatherInfoDto.location").value(comment.getWeatherInfo().getLocation()))
-                .andExpect(jsonPath("$.weatherInfoDto.date").value(comment.getWeatherInfo().getDate().toString()))
-                .andExpect(jsonPath("$.weatherInfoDto.feelsLikeTemperature").value(comment.getWeatherInfo().getFeelsLikeTemperature()));
-    }
-
-    @Test
-    @DisplayName("커멘트 단건 조회 - 존재하지 않는 ID")
-    public void t5() throws Exception {
-        int id = Integer.MAX_VALUE; // 존재하지 않는 ID
-
-        ResultActions resultActions = mvc
-                .perform(
-                        get("/api/v1/comments/" + id)
-                ).andDo(print());
-
-        resultActions
-                .andExpect(handler().handlerType(CommentController.class))
-                .andExpect(handler().methodName("getComment"))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.resultCode").value("404-1"))
-                .andExpect(jsonPath("$.msg").value("해당 데이터가 존재하지 않습니다."));
-    }
-
-    @Test
-    @DisplayName("커멘트 조건 검색 - 월 필터링")
-    public void t6() throws Exception {
+    @DisplayName("커멘트 조건 조회 - 월 필터링")
+    public void t2_3() throws Exception {
         ResultActions resultActions = mvc
                 .perform(
                         get("/api/v1/comments")
@@ -233,8 +184,92 @@ public class CommentControllerTest {
     }
 
     @Test
+    @DisplayName("커멘트 조건 조회 - 이메일 필터링")
+    public void t2_4() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/v1/comments")
+                                .param("email", "user1@test.com") // 이메일 필터링
+                ).andDo(print());
+
+        CommentSearchDto search = new CommentSearchDto(null, null, null, null, "user1@test.com");
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Comment> comments = commentService.findBySearch(search, pageable);
+        int size = comments.getContent().size();
+
+        resultActions
+                .andExpect(handler().handlerType(CommentController.class))
+                .andExpect(handler().methodName("getComments"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(size));
+
+        for (int i = 0; i < size; i++) {
+            Comment comment = comments.getContent().get(size - i - 1); // 역순
+            resultActions
+                    .andExpect(jsonPath("$.content[%d].id".formatted(i)).value(comment.getId()))
+                    .andExpect(jsonPath("$.content[%d].email".formatted(i)).value(comment.getEmail()))
+                    .andExpect(jsonPath("$.content[%d].imageUrl".formatted(i)).value(comment.getImageUrl()))
+                    .andExpect(jsonPath("$.content[%d].title".formatted(i)).value(comment.getTitle()))
+                    .andExpect(jsonPath("$.content[%d].sentence".formatted(i)).value(comment.getSentence()))
+                    .andExpect(jsonPath("$.content[%d].tagString".formatted(i)).value(comment.getTagString()))
+                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.location".formatted(i)).value(comment.getWeatherInfo().getLocation()))
+                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.date".formatted(i)).value(comment.getWeatherInfo().getDate().toString()))
+                    .andExpect(jsonPath("$.content[%d].weatherInfoDto.feelsLikeTemperature".formatted(i)).value(comment.getWeatherInfo().getFeelsLikeTemperature()));
+        }
+    }
+
+    @Test
+    @DisplayName("커멘트 단건 조회")
+    public void t3() throws Exception {
+        CommentSearchDto search = new CommentSearchDto(null, null, null, null, null);
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Comment> comments = commentService.findBySearch(search, pageable);
+
+        int id = comments.getContent().get(0).getId();
+
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/v1/comments/" + id)
+                ).andDo(print());
+
+        Comment comment = commentService.findById(id).get();
+
+        resultActions
+                .andExpect(handler().handlerType(CommentController.class))
+                .andExpect(handler().methodName("getComment"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(comment.getId()))
+                .andExpect(jsonPath("$.email").value(comment.getEmail()))
+                .andExpect(jsonPath("$.imageUrl").value(comment.getImageUrl()))
+                .andExpect(jsonPath("$.title").value(comment.getTitle()))
+                .andExpect(jsonPath("$.sentence").value(comment.getSentence()))
+                .andExpect(jsonPath("$.tagString").value(comment.getTagString()))
+                .andExpect(jsonPath("$.weatherInfoDto.location").value(comment.getWeatherInfo().getLocation()))
+                .andExpect(jsonPath("$.weatherInfoDto.date").value(comment.getWeatherInfo().getDate().toString()))
+                .andExpect(jsonPath("$.weatherInfoDto.feelsLikeTemperature").value(comment.getWeatherInfo().getFeelsLikeTemperature()));
+    }
+
+    @Test
+    @DisplayName("커멘트 단건 조회 - 존재하지 않는 ID")
+    public void t3_1() throws Exception {
+        int id = Integer.MAX_VALUE; // 존재하지 않는 ID
+
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/v1/comments/" + id)
+                ).andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(CommentController.class))
+                .andExpect(handler().methodName("getComment"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.resultCode").value("404-1"))
+                .andExpect(jsonPath("$.msg").value("해당 데이터가 존재하지 않습니다."));
+    }
+
+    @Test
     @DisplayName("커멘트 비밀번호 검증")
-    public void t7() throws Exception {
+    public void t4() throws Exception {
         CommentSearchDto search = new CommentSearchDto(null, null, null, null, null);
         Pageable pageable = PageRequest.of(0, 10);
         Page<Comment> comments = commentService.findBySearch(search, pageable);
@@ -263,7 +298,7 @@ public class CommentControllerTest {
 
     @Test
     @DisplayName("커멘트 비밀번호 검증 - 잘못된 비밀번호")
-    public void t8() throws Exception {
+    public void t4_1() throws Exception {
         CommentSearchDto search = new CommentSearchDto(null, null, null, null, null);
         Pageable pageable = PageRequest.of(0, 10);
         Page<Comment> comments = commentService.findBySearch(search, pageable);
@@ -292,7 +327,7 @@ public class CommentControllerTest {
 
     @Test
     @DisplayName("커멘트 삭제")
-    public void t9() throws Exception {
+    public void t5() throws Exception {
         CommentSearchDto search = new CommentSearchDto(null, null, null, null, null);
         Pageable pageable = PageRequest.of(0, 10);
         Page<Comment> comments = commentService.findBySearch(search, pageable);
@@ -358,7 +393,7 @@ public class CommentControllerTest {
 
     @Test
     @DisplayName("커멘트 작성")
-    public void t10() throws Exception {
+    public void t6() throws Exception {
         ResultActions resultActions = mvc
                 .perform(
                         post("/api/v1/comments")
@@ -398,8 +433,103 @@ public class CommentControllerTest {
     }
 
     @Test
+    @DisplayName("커멘트 작성 - inValid email")
+    public void t6_1() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        post("/api/v1/comments")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                            "email": "invalid-email",
+                                            "password": "1234",
+                                            "title": "Test Comment",
+                                            "sentence": "This is a test comment.",
+                                            "imageUrl": "http://example.com/image.jpg",
+                                            "tagString": "#test#comment",
+                                            "countryCode": "KR",
+                                            "cityName": "Seoul",
+                                            "date": "2025-01-01"
+                                        }
+                                        """)
+                ).andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(CommentController.class))
+                .andExpect(handler().methodName("createComment"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.resultCode").value("400-1"))
+                .andExpect(jsonPath("$.msg").value("""
+                        email-Email-must be a well-formed email address
+                        """.stripIndent().trim()));
+    }
+
+    @Test
+    @DisplayName("커멘트 작성 - inValid title")
+    public void t6_2() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        post("/api/v1/comments")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                            "email": "user@test.com",
+                                            "password": "1234",
+                                            "title": "",
+                                            "sentence": "This is a test comment.",
+                                            "imageUrl": "http://example.com/image.jpg",
+                                            "tagString": "#test#comment",
+                                            "countryCode": "KR",
+                                            "cityName": "Seoul",
+                                            "date": "2025-01-01"
+                                        }
+                                        """)
+                ).andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(CommentController.class))
+                .andExpect(handler().methodName("createComment"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.resultCode").value("400-1"))
+                .andExpect(jsonPath("$.msg").value("""
+                        title-NotBlank-must not be blank
+                        title-Size-size must be between 2 and 100
+                        """.stripIndent().trim()));
+    }
+
+    @Test
+    @DisplayName("커멘트 작성 - inValid date")
+    public void t6_3() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        post("/api/v1/comments")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                            "email": "user@test.com",
+                                            "password": "1234",
+                                            "title": "Test Comment",
+                                            "sentence": "This is a test comment.",
+                                            "imageUrl": "http://example.com/image.jpg",
+                                            "tagString": "#test#comment",
+                                            "countryCode": "KR",
+                                            "cityName": "Seoul",
+                                            "date": "2025-13-01"
+                                        }
+                                        """)
+                ).andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(CommentController.class))
+                .andExpect(handler().methodName("createComment"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.resultCode").value("400-1"))
+                .andExpect(jsonPath("$.msg").value("요청 본문이 올바르지 않습니다."));
+    }
+
+    @Test
     @DisplayName("커멘트 수정")
-    public void t11() throws Exception {
+    public void t7() throws Exception {
         CommentSearchDto search = new CommentSearchDto(null, null, null, null, null);
         Pageable pageable = PageRequest.of(0, 10);
         Page<Comment> comments = commentService.findBySearch(search, pageable);
@@ -440,100 +570,5 @@ public class CommentControllerTest {
                 .andExpect(jsonPath("$.data.weatherInfoDto.location").value(comment.getWeatherInfo().getLocation()))
                 .andExpect(jsonPath("$.data.weatherInfoDto.date").value(comment.getWeatherInfo().getDate().toString()))
                 .andExpect(jsonPath("$.data.weatherInfoDto.feelsLikeTemperature").value(comment.getWeatherInfo().getFeelsLikeTemperature()));
-    }
-
-    @Test
-    @DisplayName("커멘트 작성 - inValid email")
-    public void t12() throws Exception {
-        ResultActions resultActions = mvc
-                .perform(
-                        post("/api/v1/comments")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content("""
-                                        {
-                                            "email": "invalid-email",
-                                            "password": "1234",
-                                            "title": "Test Comment",
-                                            "sentence": "This is a test comment.",
-                                            "imageUrl": "http://example.com/image.jpg",
-                                            "tagString": "#test#comment",
-                                            "countryCode": "KR",
-                                            "cityName": "Seoul",
-                                            "date": "2025-01-01"
-                                        }
-                                        """)
-                ).andDo(print());
-
-        resultActions
-                .andExpect(handler().handlerType(CommentController.class))
-                .andExpect(handler().methodName("createComment"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.resultCode").value("400-1"))
-                .andExpect(jsonPath("$.msg").value("""
-                        email-Email-must be a well-formed email address
-                        """.stripIndent().trim()));
-    }
-
-    @Test
-    @DisplayName("커멘트 작성 - inValid title")
-    public void t13() throws Exception {
-        ResultActions resultActions = mvc
-                .perform(
-                        post("/api/v1/comments")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content("""
-                                        {
-                                            "email": "user@test.com",
-                                            "password": "1234",
-                                            "title": "",
-                                            "sentence": "This is a test comment.",
-                                            "imageUrl": "http://example.com/image.jpg",
-                                            "tagString": "#test#comment",
-                                            "countryCode": "KR",
-                                            "cityName": "Seoul",
-                                            "date": "2025-01-01"
-                                        }
-                                        """)
-                ).andDo(print());
-
-        resultActions
-                .andExpect(handler().handlerType(CommentController.class))
-                .andExpect(handler().methodName("createComment"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.resultCode").value("400-1"))
-                .andExpect(jsonPath("$.msg").value("""
-                        title-NotBlank-must not be blank
-                        title-Size-size must be between 2 and 100
-                        """.stripIndent().trim()));
-    }
-
-    @Test
-    @DisplayName("커멘트 작성 - inValid date")
-    public void t14() throws Exception {
-        ResultActions resultActions = mvc
-                .perform(
-                        post("/api/v1/comments")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content("""
-                                        {
-                                            "email": "user@test.com",
-                                            "password": "1234",
-                                            "title": "Test Comment",
-                                            "sentence": "This is a test comment.",
-                                            "imageUrl": "http://example.com/image.jpg",
-                                            "tagString": "#test#comment",
-                                            "countryCode": "KR",
-                                            "cityName": "Seoul",
-                                            "date": "2025-13-01"
-                                        }
-                                        """)
-                ).andDo(print());
-
-        resultActions
-                .andExpect(handler().handlerType(CommentController.class))
-                .andExpect(handler().methodName("createComment"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.resultCode").value("400-1"))
-                .andExpect(jsonPath("$.msg").value("요청 본문이 올바르지 않습니다."));
     }
 }
