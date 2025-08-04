@@ -9,10 +9,11 @@ import java.time.LocalDate;
 public class CommentSpecification {
 
     public static Specification<Comment> withCriteria(CommentSearchCriteria criteria) {
-        return hasLocation(criteria.getLocation())           // 첫 번째 조건부터 시작
+        return hasLocation(criteria.getLocation())            // 첫 번째 조건부터 시작
                 .and(hasDate(criteria.getDate()))             // AND 로 연결
                 .and(hasTemperature(criteria.getFeelsLikeTemperature()))  // AND 로 연결
-                .and(hasMonth(criteria.getMonth()));          // AND 로 연결
+                .and(hasMonth(criteria.getMonth()))           // AND 로 연결
+                .and(hasEmail(criteria.getEmail()));          // AND 로 연결
     }
     
     private static Specification<Comment> hasLocation(String location) {
@@ -59,6 +60,15 @@ public class CommentSpecification {
                     criteriaBuilder.function("MONTH", Integer.class, root.get("weatherInfo").get("date")),
                     month
             );
+        };
+    }
+
+    private static Specification<Comment> hasEmail(String email) {
+        return (root, query, criteriaBuilder) -> {
+            if (email == null || email.trim().isEmpty()) {
+                return null; // null을 반환하면 이 조건은 무시됨
+            }
+            return criteriaBuilder.equal(root.get("email"), email);
         };
     }
 }

@@ -56,6 +56,7 @@ public class CommentController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @RequestParam(required = false) Double feelsLikeTemperature,
             @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) String email,
             @PageableDefault(size = 10, page = 0, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         CommentSearchCriteria criteria = CommentSearchCriteria.builder()
@@ -63,6 +64,7 @@ public class CommentController {
                 .date(date)
                 .feelsLikeTemperature(feelsLikeTemperature)
                 .month(month)
+                .email(email)
                 .build();
 
         Page<Comment> items = commentService.findByCriteria(criteria, pageable);
