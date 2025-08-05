@@ -14,7 +14,7 @@ import java.util.UUID;
 @RequestMapping("/api/v1/images")
 public class ImageUploadController {
 
-    private final String uploadDir = "./uploaded-images"; // 실제 폴더 경로
+    private final String uploadDir = System.getProperty("user.dir") + "/uploaded-images";
 
     @PostMapping("/upload")
     public ResponseEntity<?> uploadImage(@RequestParam("image") MultipartFile file) throws IOException {
