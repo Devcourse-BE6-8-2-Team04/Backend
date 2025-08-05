@@ -14,8 +14,7 @@ import java.util.UUID;
 @RequestMapping("/api/v1/images")
 public class ImageUploadController {
 
-    // 업로드 폴더 경로
-    private final String uploadDir = "./uploaded-images";
+    private final String uploadDir = "./uploaded-images"; // 실제 폴더 경로
 
     @PostMapping("/upload")
     public ResponseEntity<?> uploadImage(@RequestParam("image") MultipartFile file) throws IOException {
@@ -29,19 +28,18 @@ public class ImageUploadController {
         dest.getParentFile().mkdirs();
         file.transferTo(dest);
 
-        // 이미지 접근 URL 반환 (예시: /api/v1/images/file/...)
+        // 서버 내 파일 경로를 반환 (실제 서비스에서는 도메인 포함 URL 권장)
         String imageUrl = "/api/v1/images/file/" + filename;
         return ResponseEntity.ok(Map.of("url", imageUrl));
     }
 
-    // 업로드된 이미지를 반환하는 API (간단 예시)
     @GetMapping("/file/{filename}")
     public ResponseEntity<?> getImage(@PathVariable String filename) throws IOException {
         File file = new File(uploadDir, filename);
         if (!file.exists()) {
             return ResponseEntity.notFound().build();
         }
-        // 실제 서비스에서는 Content-Type 세팅 필요
+        // Content-Type은 실제 이미지 확장자에 따라 동적으로 처리 필요함
         return ResponseEntity.ok()
                 .header("Content-Type", "image/jpeg")
                 .body(java.nio.file.Files.readAllBytes(file.toPath()));
