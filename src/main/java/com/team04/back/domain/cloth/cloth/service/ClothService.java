@@ -87,4 +87,22 @@ public class ClothService {
 
     }
 
+
+    @Transactional
+    public void save(ClothInfo clothInfo) {
+        clothRepository.save(clothInfo);
+    }
+    public long count() {
+        return clothRepository.count();
+    }
+
+    @Transactional
+    public void save(ExtraCloth extraCloth) {
+        extraClothRepository.save(extraCloth);
+    }
+
+    public long countExtra() {
+        return extraClothRepository.count();
+    }
+
 }
